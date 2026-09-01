@@ -1,0 +1,1883 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Classifying IMDB movie reviews &#8212; Grokking Machine Learning</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=9c3e77be" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=b8b12719"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'chapter_06_logistic_regression/sentiment_analysis_imdb';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="../_static/GML.jpeg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Chapter 8 — Using probability to its maximum: The Naive Bayes model" href="../chapter_08_naive_bayes/index.html" />
+    <link rel="prev" title="Sentiment analysis with Logistic Regression" href="coding_logistic_regression.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../intro.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/GML.jpeg" class="logo__image only-light" alt="Grokking Machine Learning - Home"/>
+    <img src="../_static/GML.jpeg" class="logo__image only-dark pst-js-only" alt="Grokking Machine Learning - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../intro.html">
+                    Grokking Machine Learning
+                </a>
+            </li>
+        </ul>
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../chapter_03_linear_regression/index.html">Chapter 3 — Drawing a line close to our points: Linear regression</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_03_linear_regression/coding_linear_regression.html">Chapter 3: Linear Regression for a housing dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_03_linear_regression/house_price_predictions.html">House predictions with linear regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_03_linear_regression/refactored/coding_linear_regression.html">Chapter 3: Linear Regression for a housing dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_03_linear_regression/refactored/house_price_predictions.html">House Price Predictions with Linear Regression</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../chapter_03_linear_regression/refactored/house_price_predictions_toy.html">House predictions with linear regression using a toy dataset</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../chapter_04_testing_overfitting_underfitting/index.html">Chapter 4 — Optimizing the training process: Underfitting, overfitting, testing, and regularization</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_04_testing_overfitting_underfitting/polynomial_regression_regularization.html">Chapter 4: Testing and regularization with Turi Create</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../chapter_05_perceptron_algorithm/index.html">Chapter 5 — Using lines to split our points: The perceptron algorithm</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_05_perceptron_algorithm/coding_perceptron_algorithm.html">Chapter 5: Sentiment analysis with the perceptron algorithm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_05_perceptron_algorithm/refactored/coding_perceptron_algorithm.html">Chapter 5: Sentiment analysis with the Perceptron algorithm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_05_perceptron_algorithm/refactored/sentiment_analysis_toy.html">Sentiment analysis with the Perceptron algorithm &amp; statsmodels</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Chapter 6 — A continuous approach to splitting points: Logistic classifiers</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="coding_logistic_regression.html">Sentiment analysis with Logistic Regression</a></li>
+
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Classifying IMDB movie reviews</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../chapter_08_naive_bayes/index.html">Chapter 8 — Using probability to its maximum: The Naive Bayes model</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_08_naive_bayes/coding_naive_bayes.html">Coding a spam classifier with naive Bayes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_08_naive_bayes/refactored/coding_naive_bayes.html">1. Calculating prior probabilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_08_naive_bayes/refactored/spam_email_predictions.html">Predicting Ham vs Spam emails</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../chapter_09_decision_trees/index.html">Chapter 9 — Splitting data by asking questions: Decision trees</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_09_decision_trees/gini_entropy_calculations.html">Gini index calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_09_decision_trees/graphical_example.html">A graphical example</a></li>
+
+
+
+<li class="toctree-l2"><a class="reference internal" href="../chapter_09_decision_trees/app_recommendations.html">App dataset with decision trees</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="../chapter_09_decision_trees/regression_decision_tree.html">Decision trees for regression</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../chapter_09_decision_trees/university_admissions.html">The dataset</a></li>
+
+
+
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../chapter_10_neural_networks/index.html">Chapter 10 — Combining building blocks to gain more power: Neural networks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_10_neural_networks/graphical_example.html">A graphical example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_10_neural_networks/plotting_boundaries.html">Plotting the boundary of a neural network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_10_neural_networks/image_recognition.html">Building an image recognition neural network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_10_neural_networks/house_price_predictions_neural_network.html">Using a regression neural network to predict housing prices in Hyderabad</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../chapter_11_support_vector_machines/index.html">Chapter 11 — Finding boundaries with style: Support vector machines and the kernel method</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_11_support_vector_machines/building_the_datasets.html">Building a linear dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_11_support_vector_machines/calculating_similarities.html">Calculating the similarity matrix and using it to fit an SVM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_11_support_vector_machines/svm_graphical_example.html">Building an SVM to separate a linear dataset</a></li>
+
+
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../chapter_12_ensemble_methods/index.html">Chapter 12 — Combining models to maximize results: Ensemble learning</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_12_ensemble_methods/random_forests_and_adaboost.html">Spam dataset with ensemble methods</a></li>
+
+
+
+
+
+
+
+<li class="toctree-l2"><a class="reference internal" href="../chapter_12_ensemble_methods/gradient_boosting_and_xgboost.html">Fitting a decision tree</a></li>
+
+
+
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../chapter_13_end_to_end_example/index.html">Chapter 13 — Putting it all in practice: A real life example of data engineering and machine learning</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_13_end_to_end_example/end_to_end_example.html">13. Machine learning techniques</a></li>
+
+
+
+
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/chapter_06_logistic_regression/sentiment_analysis_imdb.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Classifying IMDB movie reviews</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="classifying-imdb-movie-reviews">
+<h1>Classifying IMDB movie reviews<a class="headerlink" href="#classifying-imdb-movie-reviews" title="Link to this heading">#</a></h1>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">turicreate</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">utils</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">movies</span> <span class="o">=</span> <span class="n">tc</span><span class="o">.</span><span class="n">SFrame</span><span class="p">(</span><span class="s1">'./IMDB_Dataset.csv'</span><span class="p">)</span>
+<span class="n">movies</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>Finished parsing file /Users/luisserrano/Documents/Book/code/manning/Chapter 6 - Logistic Regression/IMDB Dataset.csv</pre></div><div class="output text_html"><pre>Parsing completed. Parsed 100 lines in 0.755906 secs.</pre></div><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>------------------------------------------------------
+Inferred types from first 100 line(s) of file as 
+column_type_hints=[str,str]
+If parsing fails due to incorrect types, you can correct
+the inferred type list above and pass it to read_csv in
+the column_type_hints argument
+------------------------------------------------------
+</pre></div>
+</div>
+<div class="output text_html"><pre>Read 39624 lines. Lines per second: 37039.5</pre></div><div class="output text_html"><pre>Finished parsing file /Users/luisserrano/Documents/Book/code/manning/Chapter 6 - Logistic Regression/IMDB Dataset.csv</pre></div><div class="output text_html"><pre>Parsing completed. Parsed 50000 lines in 1.24294 secs.</pre></div><div class="output text_html"><div style="max-height:1000px;max-width:1500px;overflow:auto;"><table frame="box" rules="cols">
+    <tr>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">review</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">sentiment</th>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">One of the other<br>reviewers has mentioned ...</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">A wonderful little<br>production. &lt;br /&gt;&lt;br ...</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">I thought this was a<br>wonderful way to spend ...</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">Basically there&#x27;s a<br>family where a little ...</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">negative</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">Petter Mattei&#x27;s &quot;Love in<br>the Time of Money&quot; is a ...</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">Probably my all-time<br>favorite movie, a story ...</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">I sure would like to see<br>a resurrection of a up ...</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">This show was an amazing,<br>fresh &amp; innovative idea ...</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">negative</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">Encouraged by the<br>positive comments about ...</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">negative</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">If you like original gut<br>wrenching laughter you ...</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+    </tr>
+</table>
+[50000 rows x 2 columns]<br/>Note: Only the head of the SFrame is printed.<br/>You can use print_rows(num_rows=m, num_columns=n) to print more rows and columns.
+</div></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">movies</span><span class="p">[</span><span class="s1">'words'</span><span class="p">]</span> <span class="o">=</span> <span class="n">tc</span><span class="o">.</span><span class="n">text_analytics</span><span class="o">.</span><span class="n">count_words</span><span class="p">(</span><span class="n">movies</span><span class="p">[</span><span class="s1">'review'</span><span class="p">])</span>
+<span class="n">movies</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div style="max-height:1000px;max-width:1500px;overflow:auto;"><table frame="box" rules="cols">
+    <tr>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">review</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">sentiment</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">words</th>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">One of the other<br>reviewers has mentioned ...</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">{&#x27;if&#x27;: 1.0, &#x27;viewing&#x27;:<br>1.0, &#x27;comfortable&#x27;: 1.0, ...</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">A wonderful little<br>production. &lt;br /&gt;&lt;br ...</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">{&#x27;done&#x27;: 1.0, &#x27;every&#x27;:<br>1.0, &#x27;decorating&#x27;: 1.0, ...</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">I thought this was a<br>wonderful way to spend ...</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">{&#x27;see&#x27;: 1.0, &#x27;go&#x27;: 1.0,<br>&#x27;great&#x27;: 1.0, &#x27;superm ...</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">Basically there&#x27;s a<br>family where a little ...</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">negative</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">{&#x27;them&#x27;: 1.0, &#x27;ignore&#x27;:<br>1.0, &#x27;dialogs&#x27;: 1.0, ...</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">Petter Mattei&#x27;s &quot;Love in<br>the Time of Money&quot; is a ...</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">{&#x27;work&#x27;: 1.0, &#x27;his&#x27;: 1.0,<br>&#x27;for&#x27;: 1.0, &#x27;anxiously&#x27;: ...</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">Probably my all-time<br>favorite movie, a story ...</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">{&#x27;for&#x27;: 1.0, &#x27;dozen&#x27;:<br>1.0, &#x27;i&#x27;: 1.0, &#x27;if&#x27;:  ...</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">I sure would like to see<br>a resurrection of a up ...</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">{&#x27;do&#x27;: 1.0, &#x27;lets&#x27;: 1.0,<br>&#x27;go&#x27;: 1.0, &#x27;movies&#x27;:  ...</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">This show was an amazing,<br>fresh &amp; innovative idea ...</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">negative</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">{&#x27;awful&#x27;: 1.0, &#x27;just&#x27;:<br>1.0, &#x27;huge&#x27;: 1.0, &#x27;a&#x27;: ...</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">Encouraged by the<br>positive comments about ...</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">negative</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">{&#x27;effort&#x27;: 1.0, &#x27;an&#x27;:<br>1.0, &#x27;making&#x27;: 1.0, ...</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">If you like original gut<br>wrenching laughter you ...</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">{&#x27;camp&#x27;: 1.0, &#x27;great&#x27;:<br>1.0, &#x27;br&#x27;: 2.0, &#x27;mom&#x27;: ...</td>
+    </tr>
+</table>
+[50000 rows x 3 columns]<br/>Note: Only the head of the SFrame is printed.<br/>You can use print_rows(num_rows=m, num_columns=n) to print more rows and columns.
+</div></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">tc</span><span class="o">.</span><span class="n">logistic_classifier</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">movies</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="p">[</span><span class="s1">'words'</span><span class="p">],</span> <span class="n">target</span><span class="o">=</span><span class="s1">'sentiment'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>PROGRESS: Creating a validation set from 5 percent of training data. This may take a while.
+          You can set ``validation_set=None`` to disable validation tracking.
+</pre></div>
+</div>
+<div class="output text_html"><pre>Logistic regression:</pre></div><div class="output text_html"><pre>--------------------------------------------------------</pre></div><div class="output text_html"><pre>Number of examples          : 47500</pre></div><div class="output text_html"><pre>Number of classes           : 2</pre></div><div class="output text_html"><pre>Number of feature columns   : 1</pre></div><div class="output text_html"><pre>Number of unpacked features : 101655</pre></div><div class="output text_html"><pre>Number of coefficients      : 101656</pre></div><div class="output text_html"><pre>Starting L-BFGS</pre></div><div class="output text_html"><pre>--------------------------------------------------------</pre></div><div class="output text_html"><pre>+-----------+----------+-----------+--------------+-------------------+---------------------+</pre></div><div class="output text_html"><pre>| Iteration | Passes   | Step size | Elapsed Time | Training Accuracy | Validation Accuracy |</pre></div><div class="output text_html"><pre>+-----------+----------+-----------+--------------+-------------------+---------------------+</pre></div><div class="output text_html"><pre>| 0         | 2        | 1.000000  | 1.494704     | 0.919747          | 0.855600            |</pre></div><div class="output text_html"><pre>| 1         | 4        | 1.000000  | 2.085863     | 0.961305          | 0.880000            |</pre></div><div class="output text_html"><pre>| 2         | 5        | 1.000000  | 2.452073     | 0.978611          | 0.893200            |</pre></div><div class="output text_html"><pre>| 3         | 7        | 1.000000  | 3.015716     | 0.982779          | 0.898000            |</pre></div><div class="output text_html"><pre>| 4         | 8        | 1.000000  | 3.400111     | 0.988021          | 0.902400            |</pre></div><div class="output text_html"><pre>| 9         | 13       | 1.000000  | 5.560842     | 0.999453          | 0.876400            |</pre></div><div class="output text_html"><pre>+-----------+----------+-----------+--------------+-------------------+---------------------+</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Class                          : LogisticClassifier
+
+Schema
+------
+Number of coefficients         : 101656
+Number of examples             : 47500
+Number of classes              : 2
+Number of feature columns      : 1
+Number of unpacked features    : 101655
+
+Hyperparameters
+---------------
+L1 penalty                     : 0.0
+L2 penalty                     : 0.01
+
+Training Summary
+----------------
+Solver                         : lbfgs
+Solver iterations              : 10
+Solver status                  : Completed (Iteration limit reached).
+Training time (sec)            : 3.1407
+
+Settings
+--------
+Log-likelihood                 : 374.1102
+
+Highest Positive Coefficients
+-----------------------------
+words[midichlorians]           : 22.2978
+words[nighteyes]               : 21.2877
+words[whirry]                  : 21.2877
+words[8bit]                    : 19.9989
+words[videozone]               : 19.8255
+
+Lowest Negative Coefficients
+----------------------------
+words[newlwed]                 : -18.009
+words[sierre]                  : -17.6438
+words[unfortuntately]          : -17.123
+words[toyshop]                 : -16.0545
+words[bsed]                    : -15.2391
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">weights</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">coefficients</span>
+<span class="n">weights</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div style="max-height:1000px;max-width:1500px;overflow:auto;"><table frame="box" rules="cols">
+    <tr>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">name</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">index</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">class</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">value</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">stderr</th>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">(intercept)</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">0.06841566205877811</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">if</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-0.023487063039285324</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">viewing</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">0.16124947220364833</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">comfortable</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">0.5654439707483887</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">become</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">0.12089471177392803</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">may</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">0.16770006937309084</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">skills</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-0.4011207964029393</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">lack</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-0.42365012385990636</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">their</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">0.008015650441388742</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">class</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-0.06077613785804</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+</table>
+[101656 rows x 5 columns]<br/>Note: Only the head of the SFrame is printed.<br/>You can use print_rows(num_rows=m, num_columns=n) to print more rows and columns.
+</div></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">weights</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="s1">'value'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div style="max-height:1000px;max-width:1500px;overflow:auto;"><table frame="box" rules="cols">
+    <tr>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">name</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">index</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">class</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">value</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">stderr</th>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">newlwed</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-18.008960203460823</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">sierre</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-17.643778002004012</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">unfortuntately</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-17.12296496134024</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">toyshop</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-16.054498069060507</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">bsed</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-15.239138446768948</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">lodz</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-15.029381423751193</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">graziano</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-14.766242419647488</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">infirmities</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-14.765733970935916</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">taylors</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-14.272434157625183</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">ruhle</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-14.206555935398512</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+</table>
+[101656 rows x 5 columns]<br/>Note: Only the head of the SFrame is printed.<br/>You can use print_rows(num_rows=m, num_columns=n) to print more rows and columns.
+</div></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">weights</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="s1">'value'</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div style="max-height:1000px;max-width:1500px;overflow:auto;"><table frame="box" rules="cols">
+    <tr>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">name</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">index</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">class</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">value</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">stderr</th>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">midichlorians</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">22.29776983281403</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">nighteyes</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">21.287690860097893</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">whirry</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">21.287690860097893</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">8bit</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">19.998927723414244</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">videozone</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">19.825507508362612</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">hrm</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">19.55156183659826</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">tensionate</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">18.942245937977955</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">scribble</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">17.774387325839538</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">anansie</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">17.55684264349084</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">scenerios</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">17.546873914743603</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+</table>
+[101656 rows x 5 columns]<br/>Note: Only the head of the SFrame is printed.<br/>You can use print_rows(num_rows=m, num_columns=n) to print more rows and columns.
+</div></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">weights</span><span class="p">[</span><span class="n">weights</span><span class="p">[</span><span class="s1">'index'</span><span class="p">]</span><span class="o">==</span><span class="s1">'wonderful'</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div style="max-height:1000px;max-width:1500px;overflow:auto;"><table frame="box" rules="cols">
+    <tr>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">name</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">index</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">class</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">value</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">stderr</th>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">wonderful</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.062507005990737</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+</table>
+[? rows x 5 columns]<br/>Note: Only the head of the SFrame is printed. This SFrame is lazily evaluated.<br/>You can use sf.materialize() to force materialization.
+</div></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">weights</span><span class="p">[</span><span class="n">weights</span><span class="p">[</span><span class="s1">'index'</span><span class="p">]</span><span class="o">==</span><span class="s1">'horrible'</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div style="max-height:1000px;max-width:1500px;overflow:auto;"><table frame="box" rules="cols">
+    <tr>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">name</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">index</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">class</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">value</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">stderr</th>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">horrible</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-1.0873352069705353</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+</table>
+[? rows x 5 columns]<br/>Note: Only the head of the SFrame is printed. This SFrame is lazily evaluated.<br/>You can use sf.materialize() to force materialization.
+</div></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">weights</span><span class="p">[</span><span class="n">weights</span><span class="p">[</span><span class="s1">'index'</span><span class="p">]</span><span class="o">==</span><span class="s1">'the'</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div style="max-height:1000px;max-width:1500px;overflow:auto;"><table frame="box" rules="cols">
+    <tr>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">name</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">index</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">class</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">value</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">stderr</th>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">words</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">the</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">positive</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">0.0005341182880871852</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">None</td>
+    </tr>
+</table>
+[? rows x 5 columns]<br/>Note: Only the head of the SFrame is printed. This SFrame is lazily evaluated.<br/>You can use sf.materialize() to force materialization.
+</div></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">movies</span><span class="p">[</span><span class="s1">'predictions'</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">movies</span><span class="p">,</span> <span class="n">output_type</span><span class="o">=</span><span class="s1">'probability'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">movies</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="s1">'predictions'</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{'review': 'It seems to me that a lot of people don\'t know that Blade is actually a superhero movie on par with X-Men, Daredevil, Punisher and the likes. What all these heroes (and in the case of X-Men hero group) have in common is that they were all conceived in the magical world of Marvel. Blade was originally a normal person (in a blue outfit) who chased vampires because of a personal grudge and eventually facing of with Dracula himself and he was for lack of a better word boring. So boring in fact that the character was shelved and in fact never used in the Marvel universe. At least until he was reinvented.&lt;br /&gt;&lt;br /&gt;David Goyer did a stroke of genius when he took the character of Blade and turned him into a leather clad dark knight. He can\'t take all the credit though and much of this must go to Stephen Norrington as well who with his distinct visual style brings out the best of the character. The Blade character (Wesley Snipes) is pretty amazing in this film and mixes martial arts with Batman like darkness. Snipes is pretty good as the title character and is successful in bringing out the duality and inner demons of the character. He is, however, a pretty rigid actor both in voice and in posture and is only interesting enough for one film (which is clearly seen from the inferior sequels). Kris Kristofferson is good as well and really brings the tormented character of Whistler to life with energy and sense of timing. N\'Bushe Wright, however, is fairly weak as a leading lady making her character relatively flat and lifeless. Donal Logue is pretty funny and manages to do a lot with a minor character. German, Udo Kier, should also be mentioned as he brings a lot of finesse and style to the vampire race, probably born of his experiences from playing Dracula. Stephen Dorf provides the best acting in the film and his chilling performance as Deacon Frost stands as one of the best screen villains I have perhaps ever seen.&lt;br /&gt;&lt;br /&gt;The story is good and, I feel, renews the vampire genre (something that hasn\'t been done since Robert Rodrigues\' From Dusk Till Dawn) by adding a lot of contemporary elements and maintaining the comic book feel. By saying that the film has a comic book feel does not mean that the film is unrealistic. Far from it. A lot of effort has been put in trying to make the film seem as real as possible. Including the effects which are pretty good for their time. I found the vampire "dustings" to be a very nice touch. In stead of adding a lot of blood when a vampire dies Norrington chose to let the vampires spontaneously com-bust which looks great. The fact that the overall effects were well done adds to the credibility of the film which would otherwise have fallen flat on its face.&lt;br /&gt;&lt;br /&gt;As previously stated Norrington has a very distinct visual style that sets him apart from the directors of the following Blade movies. Del Toro is nearly as skilled but I prefer Norrington\'s style. His style gives the film a very special look and feel but most importantly it gives the film atmosphere. A very tense dark atmosphere which works great in tune with the main character and story. Along with the visual style the music which also works fine and adds a lot to the atmosphere of the movie.&lt;br /&gt;&lt;br /&gt;All in all Blade is a very entertaining movie that should probably have had an 8 from me but a few annoying flaws (which cannot be revealed without spoiling the movie, suffice to say, many of them are located near the ending of the film) does that the film must settle with a high 7.&lt;br /&gt;&lt;br /&gt;7/10',
+ 'sentiment': 'positive',
+ 'words': {'7': 2.0,
+  'many': 1.0,
+  'spoiling': 1.0,
+  'without': 1.0,
+  'revealed': 1.0,
+  'annoying': 1.0,
+  'few': 1.0,
+  'an': 1.0,
+  'had': 1.0,
+  'fine': 1.0,
+  'music': 1.0,
+  'along': 1.0,
+  'main': 1.0,
+  'importantly': 1.0,
+  'settle': 1.0,
+  'most': 1.0,
+  's': 1.0,
+  'prefer': 1.0,
+  'say': 1.0,
+  'but': 3.0,
+  'del': 1.0,
+  'directors': 1.0,
+  'apart': 1.0,
+  'sets': 1.0,
+  'fallen': 1.0,
+  'otherwise': 1.0,
+  'its': 1.0,
+  'great': 2.0,
+  'looks': 1.0,
+  'com': 1.0,
+  'spontaneously': 1.0,
+  'let': 1.0,
+  'chose': 1.0,
+  'dies': 1.0,
+  'nice': 1.0,
+  'very': 5.0,
+  'dustings': 1.0,
+  'found': 1.0,
+  'time': 1.0,
+  'their': 1.0,
+  'possible': 1.0,
+  'make': 1.0,
+  'including': 1.0,
+  'trying': 1.0,
+  'effort': 1.0,
+  'entertaining': 1.0,
+  'mean': 1.0,
+  'saying': 1.0,
+  'book': 2.0,
+  'maintaining': 1.0,
+  'contemporary': 1.0,
+  'adding': 2.0,
+  'by': 2.0,
+  'dawn': 1.0,
+  'suffice': 1.0,
+  'following': 1.0,
+  'till': 1.0,
+  'rodrigues': 1.0,
+  'bust': 1.0,
+  'since': 1.0,
+  'been': 2.0,
+  'hasn': 1.0,
+  'something': 1.0,
+  'atmosphere': 3.0,
+  'blood': 1.0,
+  'genre': 1.0,
+  'feel': 4.0,
+  'unrealistic': 1.0,
+  'story': 2.0,
+  'villains': 1.0,
+  'stands': 1.0,
+  'performance': 1.0,
+  'word': 1.0,
+  'playing': 1.0,
+  'these': 1.0,
+  'probably': 2.0,
+  'toro': 1.0,
+  'the': 45.0,
+  'visual': 3.0,
+  'race': 1.0,
+  'would': 1.0,
+  'vampire': 4.0,
+  'finesse': 1.0,
+  'punisher': 1.0,
+  'be': 3.0,
+  'do': 1.0,
+  'udo': 1.0,
+  'movies': 1.0,
+  'manages': 1.0,
+  'go': 1.0,
+  'i': 4.0,
+  'likes': 1.0,
+  'he': 6.0,
+  'when': 2.0,
+  'logue': 1.0,
+  'stead': 1.0,
+  'lifeless': 1.0,
+  'universe': 1.0,
+  'relatively': 1.0,
+  'demons': 1.0,
+  'her': 1.0,
+  'lady': 1.0,
+  'stroke': 1.0,
+  'leading': 1.0,
+  'knight': 1.0,
+  'energy': 1.0,
+  'stated': 1.0,
+  'common': 1.0,
+  'amazing': 1.0,
+  'life': 1.0,
+  'located': 1.0,
+  'robert': 1.0,
+  'tormented': 1.0,
+  'kristofferson': 1.0,
+  'provides': 1.0,
+  'for': 3.0,
+  'lack': 1.0,
+  'kris': 1.0,
+  'fairly': 1.0,
+  'sequels': 1.0,
+  'inferior': 1.0,
+  'wright': 1.0,
+  'clearly': 1.0,
+  'voice': 1.0,
+  'interesting': 1.0,
+  'acting': 1.0,
+  'only': 1.0,
+  'both': 1.0,
+  'far': 1.0,
+  'men': 2.0,
+  'inner': 1.0,
+  'put': 1.0,
+  'duality': 1.0,
+  'cannot': 1.0,
+  'experiences': 1.0,
+  'face': 1.0,
+  'a': 26.0,
+  'successful': 1.0,
+  'chilling': 1.0,
+  'elements': 1.0,
+  'timing': 1.0,
+  'actor': 1.0,
+  'good': 4.0,
+  'should': 2.0,
+  'donal': 1.0,
+  'distinct': 2.0,
+  'mixes': 1.0,
+  'film': 11.0,
+  'until': 1.0,
+  'posture': 1.0,
+  'pretty': 5.0,
+  'dusk': 1.0,
+  'weak': 1.0,
+  'bushe': 1.0,
+  'frost': 1.0,
+  'personal': 1.0,
+  'one': 2.0,
+  'high': 1.0,
+  'wesley': 1.0,
+  'from': 6.0,
+  'himself': 1.0,
+  'brings': 3.0,
+  'darkness': 1.0,
+  'his': 4.0,
+  'like': 1.0,
+  'well': 3.0,
+  'norrington': 4.0,
+  'must': 2.0,
+  'credibility': 1.0,
+  'out': 2.0,
+  'also': 2.0,
+  'this': 2.0,
+  'much': 1.0,
+  'know': 1.0,
+  'flat': 2.0,
+  'though': 1.0,
+  'turned': 1.0,
+  'funny': 1.0,
+  'did': 1.0,
+  'can': 1.0,
+  'bringing': 1.0,
+  'has': 3.0,
+  'heroes': 1.0,
+  'fact': 3.0,
+  'br': 10.0,
+  'dark': 2.0,
+  'sense': 1.0,
+  'n': 1.0,
+  'him': 2.0,
+  'screen': 1.0,
+  'works': 2.0,
+  'which': 7.0,
+  'vampires': 2.0,
+  'took': 1.0,
+  'genius': 1.0,
+  'dorf': 1.0,
+  'them': 1.0,
+  'minor': 1.0,
+  'reinvented': 1.0,
+  'tune': 1.0,
+  'me': 2.0,
+  'actually': 1.0,
+  'hero': 1.0,
+  'used': 1.0,
+  '8': 1.0,
+  'best': 3.0,
+  'because': 1.0,
+  'seen': 2.0,
+  'never': 1.0,
+  'special': 1.0,
+  'so': 1.0,
+  'boring': 2.0,
+  'title': 1.0,
+  'batman': 1.0,
+  'outfit': 1.0,
+  'character': 10.0,
+  'grudge': 1.0,
+  'better': 1.0,
+  'normal': 1.0,
+  'enough': 1.0,
+  'martial': 1.0,
+  'as': 11.0,
+  'real': 1.0,
+  'does': 2.0,
+  'goyer': 1.0,
+  'facing': 1.0,
+  'seems': 1.0,
+  'eventually': 1.0,
+  'leather': 1.0,
+  'look': 1.0,
+  'dracula': 2.0,
+  'gives': 2.0,
+  'blue': 1.0,
+  'previously': 1.0,
+  'person': 1.0,
+  'what': 1.0,
+  'conceived': 1.0,
+  'originally': 1.0,
+  'touch': 1.0,
+  'world': 1.0,
+  'magical': 1.0,
+  'german': 1.0,
+  'who': 2.0,
+  'seem': 1.0,
+  'group': 1.0,
+  'ending': 1.0,
+  'they': 1.0,
+  'perhaps': 1.0,
+  'overall': 1.0,
+  'ever': 1.0,
+  'really': 1.0,
+  'flaws': 1.0,
+  'par': 1.0,
+  'however': 2.0,
+  'on': 2.0,
+  'done': 2.0,
+  'arts': 1.0,
+  'don': 1.0,
+  'clad': 1.0,
+  'blade': 6.0,
+  'renews': 1.0,
+  'daredevil': 1.0,
+  'into': 1.0,
+  'shelved': 1.0,
+  'that': 11.0,
+  'case': 1.0,
+  'are': 2.0,
+  'marvel': 2.0,
+  'tense': 1.0,
+  'stephen': 2.0,
+  'skilled': 1.0,
+  'nearly': 1.0,
+  'credit': 1.0,
+  'making': 1.0,
+  'whistler': 1.0,
+  'it': 3.0,
+  'people': 1.0,
+  'with': 9.0,
+  'not': 1.0,
+  'take': 1.0,
+  'is': 15.0,
+  't': 3.0,
+  'x': 2.0,
+  'movie': 4.0,
+  'superhero': 1.0,
+  'chased': 1.0,
+  'of': 25.0,
+  'deacon': 1.0,
+  'effects': 2.0,
+  'born': 1.0,
+  'kier': 1.0,
+  'rigid': 1.0,
+  'snipes': 2.0,
+  'david': 1.0,
+  'and': 23.0,
+  'was': 4.0,
+  'mentioned': 1.0,
+  'adds': 2.0,
+  'least': 1.0,
+  'style': 6.0,
+  'all': 5.0,
+  '10': 1.0,
+  'near': 1.0,
+  'at': 1.0,
+  'to': 11.0,
+  'comic': 2.0,
+  'in': 16.0,
+  'lot': 7.0,
+  'have': 4.0,
+  'were': 2.0},
+ 'predictions': 1.0}
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">movies</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="s1">'predictions'</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{'review': "Even duller, if possible, than the original (I hope I may say that under the IMDb guidelines). THE FRENCH CONNECTION at least tried to absorb European influences, to complicate the conventional view of the American police detective, even if the attempt was foundered by Friedkin's ambivalence, Americaness and general indirection. The (relative) arthouse boom of the 1960s (especially with the nouvelle vague) allowed for a huge influence of European cinema in Hollywood. This lent a new vigour and complexity to a weary medium, and, in the best of them (eg BONNIE AND CLYDE, early Scorcese), a new subversion of received practice. The original CONNECTION was part of this movement, with its difficultly distanced style, and anti-detective figure. TWO is old Hollywood's right-wing reassertion of American values.&lt;br /&gt;&lt;br /&gt;This is figured in the film's very tiresome America vs France dialectic. For instance, TWO is shot like a 70s French policier. It was the French, of course, who insisted on the greatness of American movies when they were ignored at home, and this, in a sense, is a reclamation, a warning against Gallic presumption. This can be seen in the pattern of the two movies. CONNECTION has French gangsters invading New York, with the French style smothering the American thriller - this leads to the dissolution of the detective figure, and irresolution of plot - the baddie got away. &lt;br /&gt;&lt;br /&gt;TWO has the American returning to France, with American thriller values imposed on the native genre - the power of the detective is reasserted and conventional resolution is achieved. This is further dramatised in Doyle's relationship with French inspector Barthelmy, whose dominant influence he must shake off before he can control the plot.&lt;br /&gt;&lt;br /&gt;TWO seems to follow the original by undermining its detective hero. From the start, Doyle's importance is diminished at every turn. Despite the ending of CONNECTION, he is considered a hero. But he is an American in a foreign land, and his inability to control language or customs means he cannot dominate the plot. He even misreads the signs of the police force, mistaking an informer for a criminal, and getting him killed. &lt;br /&gt;&lt;br /&gt;A detective's power comes from his power as subject to see and interpret, but Doyle spends much of the movie being watched, controlled, an object, a body (literally in the scenes after he is dumped by Charnier) to be viewed and interpreted. In CONNECTION, he instigated the action, chasing the criminals, forcing the plot; here he is passive, tied to a bed, locked in a cell, an addict, a dependent.&lt;br /&gt;&lt;br /&gt;This loss of phallic power is predictably symbolised in the loss of his gun, and the film follows a depressingly familiar Oedipal trajectory. In the heroin sequences, he is comforted by an old lady who says he looks like her son. His drugged state is like a return to the womb, robbed of adult pressures. Her taking his watch reinforces the timelessness of this state, doubly significant for a man whose career depends on timetables and precision.&lt;br /&gt;&lt;br /&gt;Oedipus was the first detective, and to avoid his fate, Doyle must reject this false mother who is dissolving his unified identity, and kill the father (Charnier) so that he can take his accepted masculine role in society. Psychoanalytic theory was popular among academics in the 70s(ironically instigated by a Frenchman, Jacques Lacan), but it's rare to see a film so literally full of it. &lt;br /&gt;&lt;br /&gt;If all of these facts tended towards the minimising of Doyle, then the film's style doesn't. Friedkin distanced us from his hero by refusing empathy or character motivation, focusing on the mechanics of plot. Here, Doyle is a very conventional Hollywood hero. Instead of being lost in murky long shot, he is made knowable and understandable to the viewer with the traditional devices - point-of-view shots, close ups, connecting shots etc.&lt;br /&gt;&lt;br /&gt;TWO is all about the fall and rise of Popeye Doyle. Plot in this case is subservient to the acting, which is the usual Hackman showiness. The cold turkey scenes, therefore, despite their tediousness, are not disturbing. We are allowed to share rather than coldly observe; this a far less discomforting experience. The scenes are also shot through with a lachrymose manly sentimentality that is very American. &lt;br /&gt;&lt;br /&gt;So while CONNECTION tried to imitate the complex thrillers of Jean Pierre Melville, TWO does the complete opposite. Melville's LE SAMOURAI featured a gangster who started the film whole, powerful, outside language, and charted his eventual disintegration. TWO starts with a disintegrated character, achieved partly through inability with language, whose dominance begins when he steps outside language - the concluding action sequences are largely wordless. &lt;br /&gt;&lt;br /&gt;In the film, the locale and language are important as they fixed and undermined the detective, but as he regains his power (figured in the return of his gun, and the cathartic burning of the primal site of vulnerability, the tower block where Charnier held him), the Marseilles setting becomes more irrelevant, and the mythic stand-off, which could take place anywhere, takes over. Compare the endings of the two films: one admits ambiguity and despair, the other absolute certainty.&lt;br /&gt;&lt;br /&gt;",
+ 'sentiment': 'negative',
+ 'words': {'other': 1.0,
+  'films': 1.0,
+  'compare': 1.0,
+  'over': 1.0,
+  'certainty': 1.0,
+  'takes': 1.0,
+  'place': 1.0,
+  'irrelevant': 1.0,
+  'more': 1.0,
+  'marseilles': 1.0,
+  'held': 1.0,
+  'block': 1.0,
+  'vulnerability': 1.0,
+  'primal': 1.0,
+  'weary': 1.0,
+  'locale': 1.0,
+  'stand': 1.0,
+  'largely': 1.0,
+  'inspector': 1.0,
+  'steps': 1.0,
+  'control': 2.0,
+  'partly': 1.0,
+  'americaness': 1.0,
+  'disintegrated': 1.0,
+  'reclamation': 1.0,
+  'started': 1.0,
+  'eventual': 1.0,
+  'charted': 1.0,
+  'whole': 1.0,
+  'familiar': 1.0,
+  'gangster': 1.0,
+  'robbed': 1.0,
+  'are': 5.0,
+  'samourai': 1.0,
+  'le': 1.0,
+  'melville': 2.0,
+  'has': 2.0,
+  'pierre': 1.0,
+  'jean': 1.0,
+  'complex': 1.0,
+  'sentimentality': 1.0,
+  'manly': 1.0,
+  'wordless': 1.0,
+  'imitate': 1.0,
+  'discomforting': 1.0,
+  'less': 1.0,
+  'observe': 1.0,
+  'share': 1.0,
+  'dumped': 1.0,
+  'disintegration': 1.0,
+  'does': 1.0,
+  'hero': 4.0,
+  'disturbing': 1.0,
+  'which': 2.0,
+  'concluding': 1.0,
+  'cold': 1.0,
+  'acting': 1.0,
+  'rise': 1.0,
+  'fall': 1.0,
+  'interpret': 1.0,
+  'about': 1.0,
+  'etc': 1.0,
+  'i': 2.0,
+  'empathy': 1.0,
+  'close': 1.0,
+  'traditional': 1.0,
+  'motivation': 1.0,
+  'burning': 1.0,
+  't': 1.0,
+  'tended': 1.0,
+  'undermined': 1.0,
+  'sense': 1.0,
+  'subject': 1.0,
+  'these': 1.0,
+  'his': 12.0,
+  'devices': 1.0,
+  'full': 1.0,
+  'rare': 1.0,
+  'lacan': 1.0,
+  'reassertion': 1.0,
+  'jacques': 1.0,
+  'theory': 1.0,
+  'drugged': 1.0,
+  'psychoanalytic': 1.0,
+  'taking': 1.0,
+  'society': 1.0,
+  'popeye': 1.0,
+  'oedipal': 1.0,
+  'starts': 1.0,
+  'regains': 1.0,
+  'masculine': 1.0,
+  'accepted': 1.0,
+  'interpreted': 1.0,
+  'not': 1.0,
+  'take': 2.0,
+  'so': 3.0,
+  'father': 1.0,
+  'police': 2.0,
+  'kill': 1.0,
+  'minimising': 1.0,
+  'identity': 1.0,
+  'unified': 1.0,
+  'opposite': 1.0,
+  'dissolving': 1.0,
+  'mother': 1.0,
+  'false': 1.0,
+  'academics': 1.0,
+  'reject': 1.0,
+  'part': 1.0,
+  'fate': 1.0,
+  'avoid': 1.0,
+  'first': 1.0,
+  'precision': 1.0,
+  'off': 2.0,
+  'timetables': 1.0,
+  'complete': 1.0,
+  'career': 1.0,
+  'body': 1.0,
+  'significant': 1.0,
+  'long': 1.0,
+  'popular': 1.0,
+  'doubly': 1.0,
+  'timelessness': 1.0,
+  'admits': 1.0,
+  'watch': 1.0,
+  'pressures': 1.0,
+  'pattern': 1.0,
+  'shake': 1.0,
+  'therefore': 1.0,
+  'adult': 1.0,
+  'womb': 1.0,
+  'vague': 1.0,
+  'return': 2.0,
+  'like': 3.0,
+  'outside': 2.0,
+  'leads': 1.0,
+  'son': 1.0,
+  'her': 2.0,
+  'focusing': 1.0,
+  'one': 1.0,
+  'looks': 1.0,
+  'experience': 1.0,
+  'says': 1.0,
+  'heroin': 1.0,
+  'trajectory': 1.0,
+  'case': 1.0,
+  'movement': 1.0,
+  'style': 3.0,
+  'depressingly': 1.0,
+  'gun': 2.0,
+  'allowed': 2.0,
+  'symbolised': 1.0,
+  'lady': 1.0,
+  'predictably': 1.0,
+  'american': 8.0,
+  'shot': 3.0,
+  'loss': 2.0,
+  'criminal': 1.0,
+  'dependent': 1.0,
+  'further': 1.0,
+  'fixed': 1.0,
+  'connecting': 1.0,
+  'locked': 1.0,
+  'frenchman': 1.0,
+  'ambiguity': 1.0,
+  'tied': 1.0,
+  'hope': 1.0,
+  'here': 2.0,
+  'forcing': 1.0,
+  'phallic': 1.0,
+  'connection': 6.0,
+  'vigour': 1.0,
+  'hackman': 1.0,
+  'lachrymose': 1.0,
+  'criminals': 1.0,
+  'instigated': 2.0,
+  'charnier': 3.0,
+  'after': 1.0,
+  'object': 1.0,
+  'controlled': 1.0,
+  'scenes': 3.0,
+  '70s': 2.0,
+  'watched': 1.0,
+  'us': 1.0,
+  'from': 3.0,
+  'role': 1.0,
+  'despite': 2.0,
+  'being': 2.0,
+  'doesn': 1.0,
+  'movie': 1.0,
+  'character': 2.0,
+  'dominance': 1.0,
+  'they': 2.0,
+  'chasing': 1.0,
+  'force': 1.0,
+  'much': 1.0,
+  'could': 1.0,
+  'murky': 1.0,
+  'and': 24.0,
+  'see': 2.0,
+  'killed': 1.0,
+  'influence': 2.0,
+  'customs': 1.0,
+  'reasserted': 1.0,
+  'coldly': 1.0,
+  'or': 2.0,
+  'as': 3.0,
+  'them': 1.0,
+  'language': 5.0,
+  'tediousness': 1.0,
+  'inability': 2.0,
+  'with': 9.0,
+  'foreign': 1.0,
+  'values': 2.0,
+  'were': 1.0,
+  'dominate': 1.0,
+  'viewed': 1.0,
+  'barthelmy': 1.0,
+  'gangsters': 1.0,
+  'land': 1.0,
+  'diminished': 1.0,
+  'cathartic': 1.0,
+  'state': 2.0,
+  'understandable': 1.0,
+  'every': 1.0,
+  'their': 1.0,
+  'cannot': 1.0,
+  'depends': 1.0,
+  'undermining': 1.0,
+  'we': 1.0,
+  'begins': 1.0,
+  'smothering': 1.0,
+  'but': 4.0,
+  'scorcese': 1.0,
+  'achieved': 2.0,
+  'view': 2.0,
+  'showiness': 1.0,
+  'seems': 1.0,
+  'follows': 1.0,
+  'before': 1.0,
+  'sequences': 2.0,
+  'among': 1.0,
+  'when': 2.0,
+  'becomes': 1.0,
+  'he': 15.0,
+  'is': 22.0,
+  'whose': 3.0,
+  'powerful': 1.0,
+  'relationship': 1.0,
+  'doyle': 7.0,
+  'made': 1.0,
+  'cell': 1.0,
+  'imposed': 1.0,
+  'mechanics': 1.0,
+  'old': 2.0,
+  'returning': 1.0,
+  'got': 1.0,
+  'dissolution': 1.0,
+  'ending': 1.0,
+  'by': 6.0,
+  'thriller': 2.0,
+  'away': 1.0,
+  'considered': 1.0,
+  'the': 71.0,
+  'ironically': 1.0,
+  'bed': 1.0,
+  'plot': 6.0,
+  'despair': 1.0,
+  'shots': 2.0,
+  'tower': 1.0,
+  'clyde': 1.0,
+  'turn': 1.0,
+  'br': 22.0,
+  'instead': 1.0,
+  'can': 3.0,
+  'ups': 1.0,
+  'resolution': 1.0,
+  'where': 1.0,
+  'presumption': 1.0,
+  'mythic': 1.0,
+  'rather': 1.0,
+  'gallic': 1.0,
+  'against': 1.0,
+  'him': 2.0,
+  'site': 1.0,
+  'turkey': 1.0,
+  'baddie': 1.0,
+  'ignored': 1.0,
+  'france': 2.0,
+  'viewer': 1.0,
+  'genre': 1.0,
+  'greatness': 1.0,
+  'importance': 1.0,
+  'on': 4.0,
+  'endings': 1.0,
+  'who': 4.0,
+  'absolute': 1.0,
+  'nouvelle': 1.0,
+  'original': 3.0,
+  'especially': 1.0,
+  'received': 1.0,
+  'york': 1.0,
+  'that': 3.0,
+  'course': 1.0,
+  'indirection': 1.0,
+  'it': 3.0,
+  'insisted': 1.0,
+  'policier': 1.0,
+  'influences': 1.0,
+  'comes': 1.0,
+  'follow': 1.0,
+  'instance': 1.0,
+  'man': 1.0,
+  'means': 1.0,
+  'figured': 2.0,
+  'important': 1.0,
+  'mistaking': 1.0,
+  'attempt': 1.0,
+  'tiresome': 1.0,
+  'literally': 2.0,
+  'medium': 1.0,
+  'seen': 1.0,
+  'very': 3.0,
+  'lost': 1.0,
+  'movies': 2.0,
+  'then': 1.0,
+  'while': 1.0,
+  'figure': 2.0,
+  'dramatised': 1.0,
+  'this': 12.0,
+  'usual': 1.0,
+  'its': 2.0,
+  'wing': 1.0,
+  'may': 1.0,
+  'dominant': 1.0,
+  'anti': 1.0,
+  'be': 2.0,
+  'of': 32.0,
+  'start': 1.0,
+  'through': 2.0,
+  'arthouse': 1.0,
+  'early': 1.0,
+  'far': 1.0,
+  'passive': 1.0,
+  'bonnie': 1.0,
+  'featured': 1.0,
+  'vs': 1.0,
+  'getting': 1.0,
+  'spends': 1.0,
+  'eg': 1.0,
+  'power': 5.0,
+  'tried': 2.0,
+  'complexity': 1.0,
+  'film': 6.0,
+  'new': 3.0,
+  'distanced': 2.0,
+  'lent': 1.0,
+  'cinema': 1.0,
+  'an': 5.0,
+  'conventional': 3.0,
+  'huge': 1.0,
+  'reinforces': 1.0,
+  'america': 1.0,
+  'warning': 1.0,
+  'for': 4.0,
+  'foundered': 1.0,
+  'irresolution': 1.0,
+  'knowable': 1.0,
+  'all': 2.0,
+  'native': 1.0,
+  'oedipus': 1.0,
+  'must': 2.0,
+  'hollywood': 3.0,
+  'european': 2.0,
+  'possible': 1.0,
+  'informer': 1.0,
+  'under': 1.0,
+  'french': 6.0,
+  'relative': 1.0,
+  'in': 18.0,
+  '1960s': 1.0,
+  'point': 1.0,
+  'subversion': 1.0,
+  'thrillers': 1.0,
+  'if': 3.0,
+  'to': 17.0,
+  'general': 1.0,
+  'say': 1.0,
+  'ambivalence': 1.0,
+  'home': 1.0,
+  'a': 26.0,
+  'invading': 1.0,
+  'facts': 1.0,
+  'addict': 1.0,
+  's': 9.0,
+  'at': 3.0,
+  'than': 2.0,
+  'misreads': 1.0,
+  'anywhere': 1.0,
+  'absorb': 1.0,
+  'subservient': 1.0,
+  'setting': 1.0,
+  'detective': 8.0,
+  'best': 1.0,
+  'duller': 1.0,
+  'towards': 1.0,
+  'friedkin': 2.0,
+  'least': 1.0,
+  'difficultly': 1.0,
+  'guidelines': 1.0,
+  'action': 2.0,
+  'was': 5.0,
+  'also': 1.0,
+  'comforted': 1.0,
+  'imdb': 1.0,
+  'signs': 1.0,
+  'complicate': 1.0,
+  'right': 1.0,
+  'practice': 1.0,
+  'dialectic': 1.0,
+  'refusing': 1.0,
+  'boom': 1.0,
+  'two': 9.0,
+  'even': 3.0},
+ 'predictions': 1.4669526590918097e-97}
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./chapter_06_logistic_regression"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="coding_logistic_regression.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Sentiment analysis with Logistic Regression</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../chapter_08_naive_bayes/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Chapter 8 — Using probability to its maximum: The Naive Bayes model</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Luis Serrano
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

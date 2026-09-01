@@ -1,0 +1,1685 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Chapter 4: Testing and regularization with Turi Create &#8212; Grokking Machine Learning</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=9c3e77be" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=b8b12719"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'chapter_04_testing_overfitting_underfitting/polynomial_regression_regularization';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="../_static/GML.jpeg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Chapter 5 — Using lines to split our points: The perceptron algorithm" href="../chapter_05_perceptron_algorithm/index.html" />
+    <link rel="prev" title="Chapter 4 — Optimizing the training process: Underfitting, overfitting, testing, and regularization" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../intro.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/GML.jpeg" class="logo__image only-light" alt="Grokking Machine Learning - Home"/>
+    <img src="../_static/GML.jpeg" class="logo__image only-dark pst-js-only" alt="Grokking Machine Learning - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../intro.html">
+                    Grokking Machine Learning
+                </a>
+            </li>
+        </ul>
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../chapter_03_linear_regression/index.html">Chapter 3 — Drawing a line close to our points: Linear regression</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_03_linear_regression/coding_linear_regression.html">Chapter 3: Linear Regression for a housing dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_03_linear_regression/house_price_predictions.html">House predictions with linear regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_03_linear_regression/refactored/coding_linear_regression.html">Chapter 3: Linear Regression for a housing dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_03_linear_regression/refactored/house_price_predictions.html">House Price Predictions with Linear Regression</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../chapter_03_linear_regression/refactored/house_price_predictions_toy.html">House predictions with linear regression using a toy dataset</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Chapter 4 — Optimizing the training process: Underfitting, overfitting, testing, and regularization</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Chapter 4: Testing and regularization with Turi Create</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../chapter_05_perceptron_algorithm/index.html">Chapter 5 — Using lines to split our points: The perceptron algorithm</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_05_perceptron_algorithm/coding_perceptron_algorithm.html">Chapter 5: Sentiment analysis with the perceptron algorithm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_05_perceptron_algorithm/refactored/coding_perceptron_algorithm.html">Chapter 5: Sentiment analysis with the Perceptron algorithm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_05_perceptron_algorithm/refactored/sentiment_analysis_toy.html">Sentiment analysis with the Perceptron algorithm &amp; statsmodels</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../chapter_06_logistic_regression/index.html">Chapter 6 — A continuous approach to splitting points: Logistic classifiers</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_06_logistic_regression/coding_logistic_regression.html">Sentiment analysis with Logistic Regression</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../chapter_06_logistic_regression/sentiment_analysis_imdb.html">Classifying IMDB movie reviews</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../chapter_08_naive_bayes/index.html">Chapter 8 — Using probability to its maximum: The Naive Bayes model</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_08_naive_bayes/coding_naive_bayes.html">Coding a spam classifier with naive Bayes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_08_naive_bayes/refactored/coding_naive_bayes.html">1. Calculating prior probabilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_08_naive_bayes/refactored/spam_email_predictions.html">Predicting Ham vs Spam emails</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../chapter_09_decision_trees/index.html">Chapter 9 — Splitting data by asking questions: Decision trees</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_09_decision_trees/gini_entropy_calculations.html">Gini index calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_09_decision_trees/graphical_example.html">A graphical example</a></li>
+
+
+
+<li class="toctree-l2"><a class="reference internal" href="../chapter_09_decision_trees/app_recommendations.html">App dataset with decision trees</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="../chapter_09_decision_trees/regression_decision_tree.html">Decision trees for regression</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../chapter_09_decision_trees/university_admissions.html">The dataset</a></li>
+
+
+
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../chapter_10_neural_networks/index.html">Chapter 10 — Combining building blocks to gain more power: Neural networks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_10_neural_networks/graphical_example.html">A graphical example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_10_neural_networks/plotting_boundaries.html">Plotting the boundary of a neural network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_10_neural_networks/image_recognition.html">Building an image recognition neural network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_10_neural_networks/house_price_predictions_neural_network.html">Using a regression neural network to predict housing prices in Hyderabad</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../chapter_11_support_vector_machines/index.html">Chapter 11 — Finding boundaries with style: Support vector machines and the kernel method</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_11_support_vector_machines/building_the_datasets.html">Building a linear dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_11_support_vector_machines/calculating_similarities.html">Calculating the similarity matrix and using it to fit an SVM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_11_support_vector_machines/svm_graphical_example.html">Building an SVM to separate a linear dataset</a></li>
+
+
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../chapter_12_ensemble_methods/index.html">Chapter 12 — Combining models to maximize results: Ensemble learning</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_12_ensemble_methods/random_forests_and_adaboost.html">Spam dataset with ensemble methods</a></li>
+
+
+
+
+
+
+
+<li class="toctree-l2"><a class="reference internal" href="../chapter_12_ensemble_methods/gradient_boosting_and_xgboost.html">Fitting a decision tree</a></li>
+
+
+
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../chapter_13_end_to_end_example/index.html">Chapter 13 — Putting it all in practice: A real life example of data engineering and machine learning</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chapter_13_end_to_end_example/end_to_end_example.html">13. Machine learning techniques</a></li>
+
+
+
+
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/chapter_04_testing_overfitting_underfitting/polynomial_regression_regularization.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Chapter 4: Testing and regularization with Turi Create</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-our-dataset">Defining our dataset</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training-a-polynomial-regression-model">Training a polynomial regression model</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-columns-to-our-dataset-corresponding-to-x-2-x-3-ldots-x-200">Adding columns to our dataset corresponding to <span class="math notranslate nohighlight">\(x^2, x^3, \ldots, x^{200}\)</span></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#splitting-data-into-training-and-testing">Splitting data into training and testing</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training-a-polynomial-regression-model-with-no-regularization">Training a polynomial regression model with no regularization</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training-a-polynomial-regression-model-with-l1-regularization">Training a polynomial regression model with L1 regularization</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training-a-polynomial-regression-model-with-l2-regularization">Training a polynomial regression model with L2 regularization</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#viewing-the-predictions-in-the-testing-set">Viewing the predictions in the testing set</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="chapter-4-testing-and-regularization-with-turi-create">
+<h1>Chapter 4: Testing and regularization with Turi Create<a class="headerlink" href="#chapter-4-testing-and-regularization-with-turi-create" title="Link to this heading">#</a></h1>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="defining-our-dataset">
+<h2>Defining our dataset<a class="headerlink" href="#defining-our-dataset" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Our original polynomial is -x^2+x+15</span>
+<span class="n">coefs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">15</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">polynomial</span><span class="p">(</span><span class="n">coefs</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">coefs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="n">coefs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">x</span><span class="o">**</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)])</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">draw_polynomial</span><span class="p">(</span><span class="n">coefs</span><span class="p">):</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">coefs</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">sum</span><span class="p">([</span><span class="n">coefs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">x</span><span class="o">**</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]),</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">'-'</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">'black'</span><span class="p">)</span>
+
+<span class="n">draw_polynomial</span><span class="p">(</span><span class="n">coefs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/ed6a54dbb35731e76d2ab49c80237ebe28b028be95bb7fb1541da10c53b98dde.png" src="../_images/ed6a54dbb35731e76d2ab49c80237ebe28b028be95bb7fb1541da10c53b98dde.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">Y</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">40</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">polynomial</span><span class="p">(</span><span class="n">coefs</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">random</span><span class="o">.</span><span class="n">gauss</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">X</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">Y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+<span class="c1">#draw_polynomial(coefs)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.collections.PathCollection at 0x1a1ce3fb50&gt;
+</pre></div>
+</div>
+<img alt="../_images/ebd6f2ba35f6eb3b81d728ded5703f9f63a0a6f86631022c2c3523beff6b9a60.png" src="../_images/ebd6f2ba35f6eb3b81d728ded5703f9f63a0a6f86631022c2c3523beff6b9a60.png" />
+</div>
+</div>
+</section>
+<section id="training-a-polynomial-regression-model">
+<h2>Training a polynomial regression model<a class="headerlink" href="#training-a-polynomial-regression-model" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">turicreate</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tc</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">tc</span><span class="o">.</span><span class="n">SFrame</span><span class="p">({</span><span class="s1">'x'</span><span class="p">:</span><span class="n">X</span><span class="p">,</span> <span class="s1">'y'</span><span class="p">:</span><span class="n">Y</span><span class="p">})</span>
+<span class="n">data</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div style="max-height:1000px;max-width:1500px;overflow:auto;"><table frame="box" rules="cols">
+    <tr>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">y</th>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3.4442185152504816</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">6.685961311021467</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-2.4108324970703663</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">4.690236225597948</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">0.11274721368608542</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">12.205789026637378</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-1.9668727392107255</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">11.133217991032268</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-0.23403045847644144</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">10.927272159051856</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">0.046868558173902564</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">12.8584762866286</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-2.1816215560029617</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">8.16012255928749</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-2.4949365863755943</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3.5061587527226514</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">4.097462559682402</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">5.933186396721837</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">4.021659504395828</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.454299054753137</td>
+    </tr>
+</table>
+[40 rows x 2 columns]<br/>Note: Only the head of the SFrame is printed.<br/>You can use print_rows(num_rows=m, num_columns=n) to print more rows and columns.
+</div></div></div>
+</div>
+<section id="adding-columns-to-our-dataset-corresponding-to-x-2-x-3-ldots-x-200">
+<h3>Adding columns to our dataset corresponding to <span class="math notranslate nohighlight">\(x^2, x^3, \ldots, x^{200}\)</span><a class="headerlink" href="#adding-columns-to-our-dataset-corresponding-to-x-2-x-3-ldots-x-200" title="Link to this heading">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">200</span><span class="p">):</span>
+    <span class="n">string</span> <span class="o">=</span> <span class="s1">'x^'</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">[</span><span class="n">string</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">'x'</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="o">**</span><span class="n">i</span><span class="p">)</span>
+<span class="n">data</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div style="max-height:1000px;max-width:1500px;overflow:auto;"><table frame="box" rules="cols">
+    <tr>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">y</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^2</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^3</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^4</th>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3.4442185152504816</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">6.685961311021467</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">11.862641180794233</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">40.85752839466433</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">140.72225578427518</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-2.4108324970703663</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">4.690236225597948</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">5.812113328930538</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-14.012031690041567</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">33.78066134833202</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">0.11274721368608542</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">12.205789026637378</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">0.012711934193975809</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">0.0014332351609316464</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">0.00016159327095197139</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-1.9668727392107255</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">11.133217991032268</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3.8685883722503025</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-7.609021008606714</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">14.965975993910245</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-0.23403045847644144</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">10.927272159051856</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">0.05477025549469338</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-0.012817908004294928</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">0.0029997808869539904</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">0.046868558173902564</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">12.8584762866286</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">0.002196661745300489</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">0.0001029543687980023</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">4.82532282326659e-06</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-2.1816215560029617</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">8.16012255928749</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">4.759472613616784</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-10.38336804907213</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">22.652579559768178</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-2.4949365863755943</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3.5061587527226514</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">6.224708570035504</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-15.530253150907287</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">38.74699678187344</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">4.097462559682402</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">5.933186396721837</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">16.789199427999062</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">68.79311606326735</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">281.877217433124</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">4.021659504395828</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.454299054753137</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">16.173745169297295</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">65.04529598178058</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">261.5900328013676</td>
+    </tr>
+</table>
+<table frame="box" rules="cols">
+    <tr>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^5</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^6</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^7</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^8</th>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">484.67819888001475</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1669.337626520802</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">5749.563561467239</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">19802.75327301497</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-81.43951615108769</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">196.33703208272914</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-473.3356973233905</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1141.1330811306927</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.821919105025542e-05</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.054163026530763e-06</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.3160115769831987e-07</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.611238521695724e-08</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-29.436170198104204</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">57.897200709418335</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-113.8764257519668</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">223.98043745029776</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-0.0007020400963027086</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">0.00016429876560656798</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-3.8450915442018495e-05</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">8.998685369734469e-06</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.2615592345012992e-07</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.0599602054595068e-08</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">4.967880655160061e-10</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.328374034873745e-11</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-49.419355866662336</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">107.81433204249198</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-235.21007082996135</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">513.1393607116271</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-96.67129988327346</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">241.1887629312657</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-601.7506688598845</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1501.329759614511</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1154.9813448596813</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">4732.492817694172</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">19391.212134467747</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">79454.76570784066</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1052.0260416708363</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">4230.890529357441</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">17015.201109448648</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">68429.34526102059</td>
+    </tr>
+</table>
+<table frame="box" rules="cols">
+    <tr>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^9</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^10</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^11</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^12</th>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">68205.00947585523</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">234912.95646957512</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">809091.554144741</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2786688.1113181044</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-2751.0807154719087</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">6632.394790923271</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-15989.59289535804</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">38548.230167054615</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.9440986759096557e-09</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3.319389225257071e-10</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3.7425188628734854e-11</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">4.219585739566023e-12</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-440.5410165374837</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">866.4881159317581</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-1704.2718540762376</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3352.0858499866713</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-2.1059664627642036e-06</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">4.928602968167163e-07</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-1.1534432122885111e-07</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.6994084379841963e-08</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.0912753390408435e-12</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">5.114650171158102e-14</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.397162790860842e-15</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.1235156371577601e-16</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-1119.475890562065</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2442.2727342758135</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-5328.114842734408</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">11623.930193768714</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-3745.7225454767195</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">9345.340221121789</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-23316.03122980414</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">58172.019364314285</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">325562.9276762143</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1333981.906973878</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">5465940.919119198</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">22396488.26952693</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">275199.526748567</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1106758.7923536084</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">4451007.016342538</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">17900434.671406485</td>
+    </tr>
+</table>
+<table frame="box" rules="cols">
+    <tr>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^13</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^14</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^15</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^16</th>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">9597962.78923021</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">33057481.14735185</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">113857188.63525297</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">392149037.191905</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-92933.32599128349</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">224046.68236062035</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-540139.0226957856</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1302184.708850828</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">4.757465350456092e-13</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">5.3639096247202026e-14</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">6.047658646511789e-15</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">6.818566617187669e-16</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-6593.126277832797</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">12967.840342043208</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-25506.091655201875</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">50167.236360426745</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-6.317437943566161e-09</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.4784728983292561e-09</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-3.46007690240989e-10</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">8.097633838347318e-11</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">5.265755799941768e-18</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.467983820391356e-19</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.1567084325826255e-20</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">5.421325646274244e-22</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-25359.01667619951</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">55323.77741983543</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-120695.54537862289</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">263312.00351153733</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-145135.49941537727</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">362103.8674733184</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-903426.1870272816</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2253991.0471041654</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">91768772.1527527</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">376019108.04392916</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1540724216.9351716</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">6313059793.687853</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">71989453.22907849</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">289517068.79498243</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1164339071.404162</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">4682575292.85196</td>
+    </tr>
+</table>
+<table frame="box" rules="cols">
+    <tr>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^17</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^18</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^19</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^20</th>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1350646974.634009</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">4651923317.601501</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">16022240422.008537</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">55184097117.27649</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-3139349.2132856892</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">7568445.103041429</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-18246253.406705353</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">43988660.66266614</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">7.687743874208667e-17</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">8.667717013492988e-18</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">9.77260942290812e-19</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.101834482875274e-19</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-98672.56959886446</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">194076.38725187947</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-381723.5554102257</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">750801.6550509678</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-1.895092959762769e-11</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">4.4350947422875725e-12</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-1.0379472559240156e-12</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.4291127217826166e-13</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.5408971643207432e-23</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.1908818655987081e-24</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">5.581491599605866e-26</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.6159646373327602e-27</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-574447.1428150975</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1253226.2695497284</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-2734065.4441988654</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">5964696.108587057</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-5623564.728783217</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">14030437.387692597</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-35005051.56140628</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">87335383.84851664</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">25867526141.672287</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">105991219877.10797</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">434295055101.5151</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1779507728133.6638</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">18831723431.54716</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">75734779522.63525</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">304579495880.5286</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1224915024452.0178</td>
+    </tr>
+</table>
+<table frame="box" rules="cols">
+    <tr>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^21</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^22</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^23</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^24</th>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">190066089038.70444</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">654629142988.3524</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2254685814903.038</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">7765630629761.665</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-106049292.62815641</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">255667080.9592843</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-616370507.207763</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1485966049.0122192</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.2422876788743593e-20</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.4006447438963847e-21</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.5791879223837807e-22</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.780490381354894e-23</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-1476731.3078740432</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2904542.5525964564</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-5712865.566579505</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">11236479.545680864</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-5.684863639697423e-14</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.3304312439744394e-14</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-3.113614339987204e-15</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">7.286805915060279e-16</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.226064907857024e-28</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">5.746389445887741e-30</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.693249880344893e-31</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.2622873869380074e-32</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-13012709.605500508</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">28388807.7773667</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-61933634.99632773</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">135115753.149608</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-217896244.44882032</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">543637312.3092018</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-1356340620.199123</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3383983836.9221563</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">7291466290693.178</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">29876510131301.617</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">122417881676980.34</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">501602686807057.25</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">4926191150164.705</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">19811463459530.504</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">79674960318011.5</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">320425561425291.4</td>
+    </tr>
+</table>
+<table frame="box" rules="cols">
+    <tr>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^25</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^26</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^27</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^28</th>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">26746528797621.383</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">92120889703447.77</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">317284473957962.25</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1092797059807522.9</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-3582415240.501915</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">8636603079.802168</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-20821403369.085075</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">50196915876.80071</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.0074532949263996e-24</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.2633476560790303e-25</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.5518614182584302e-26</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.8771526462166026e-27</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-22100725.30309861</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">43469314.115449354</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-85498608.92586532</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">168164883.1367233</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-1.7053345291304025e-16</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3.991002217080945e-17</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-9.340160786439478e-18</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.1858821110941107e-18</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">5.916158982688746e-34</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.772818414462037e-35</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.2995800116388224e-36</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">6.090944137713512e-38</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-294771439.6267598</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">643079726.7837648</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-1402956594.1799567</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3060720347.9994926</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-8442825082.440751</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">21064313190.550972</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-52554125645.979645</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">131119210839.13454</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2055298229028015.0</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">8421507542423838.0</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3.450681185116463e+16</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.4139036961415208e+17</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1288642504557392.0</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">5182481376221680.0</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.084217548303629e+16</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">8.38201331236386e+16</td>
+    </tr>
+</table>
+<table frame="box" rules="cols">
+    <tr>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^29</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^30</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^31</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^32</th>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3763831866800358.0</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.2963459403923578e+16</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">4.464898690069156e+16</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.5378086737053808e+17</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-121016356048.49858</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">291750163838.75836</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-703360776008.0823</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1695685015964.9155</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3.243909442104694e-28</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3.657417510472881e-29</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">4.123636335925165e-30</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">4.649285071302609e-31</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-330758924.3341785</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">650560711.5235589</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-1279570128.6972206</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2516751604.042923</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-5.115629926348064e-19</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.1972132170590418e-19</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-2.80184358082383e-20</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">6.557167377994753e-21</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.8547376965241654e-39</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.3379743980077544e-40</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">6.270893090821871e-42</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.939077176295085e-43</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-6677333488.09258</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">14567414674.243217</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-31780585868.562866</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">69333211193.25986</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-327134116299.25214</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">816178875406.6528</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-2036314537278.946</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">5080475640425.731</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">5.793417457936445e+17</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.373831112650498e+18</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">9.726684107094634e+18</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3.985472395867812e+19</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3.3709603503640474e+17</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.355685473198306e+18</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">5.452105368259323e+18</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.1926511373227622e+19</td>
+    </tr>
+</table>
+<table frame="box" rules="cols">
+    <tr>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^33</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^34</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^35</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^36</th>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">5.2965491068888595e+17</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.824247250088001e+18</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">6.283106155147869e+18</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.164039055284456e+19</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-4088012541283.5015</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">9855513482957.477</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-23759992180029.04</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">57281361277751.78</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">5.241939374216821e-32</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">5.910140587543289e-33</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">6.663518837385496e-34</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">7.512931822599581e-35</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-4950130121.356891</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">9736275991.242748</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-19150015828.607246</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">37665644088.741486</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-1.5345768877788774e-21</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3.591377326142413e-22</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-8.404916821990053e-23</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.967006537306687e-23</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.3775030961477547e-44</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">6.456158399653193e-46</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3.0259083553407537e-47</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.4181996178118595e-48</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-151258828086.12152</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">329989519888.4289</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-719912249843.6646</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1570576082689.5286</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-12675464551488.137</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">31624480258814.664</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-78901072822829.44</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">196853173289962.25</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.6330323924716077e+20</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">6.691289086900991e+20</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.741730650958826e+21</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.1234138691037448e+22</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">8.818096286238407e+19</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3.5463380740228245e+20</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.4262164221194687e+21</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">5.735756829342173e+21</td>
+    </tr>
+</table>
+<table frame="box" rules="cols">
+    <tr>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^37</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^38</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x^39</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">...</th>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">7.453423381935882e+19</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.567121881406443e+20</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">8.841728714844722e+20</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">...</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-138095767244832.11</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">332925763381706.7</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-802628249472577.9</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">...</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">8.470621296116262e-36</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">9.55038949327126e-37</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.0767798049831999e-37</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">...</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-74083528562.95924</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">145712872755.02365</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-286598677173.93726</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">...</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-4.603394417520415e-24</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.0773345060801938e-24</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-2.521290883904383e-25</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">...</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">6.646897128962152e-50</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3.115304847647085e-51</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.460098464813881e-52</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">...</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-3426402637338.1655</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">7475113853162.34</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-16307869515635.318</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">...</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-491136184185261.7</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1225353634816712.0</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-3057179614752534.0</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">...</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">4.603146267680541e+22</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.8861219488562804e+23</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">7.728314068433815e+23</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">...</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">2.306726096762723e+22</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">9.276866931083695e+22</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3.7308400064408095e+23</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">...</td>
+    </tr>
+</table>
+[40 rows x 200 columns]<br/>Note: Only the head of the SFrame is printed.<br/>You can use print_rows(num_rows=m, num_columns=n) to print more rows and columns.
+</div></div></div>
+</div>
+</section>
+</section>
+<section id="splitting-data-into-training-and-testing">
+<h2>Splitting data into training and testing<a class="headerlink" href="#splitting-data-into-training-and-testing" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">random_split</span><span class="p">(</span><span class="mf">.8</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">display_results</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="n">coefs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">coefficients</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Training error (rmse):"</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">train</span><span class="p">)[</span><span class="s1">'rmse'</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Testing error (rmse):"</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">test</span><span class="p">)[</span><span class="s1">'rmse'</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">train</span><span class="p">[</span><span class="s1">'x'</span><span class="p">],</span> <span class="n">train</span><span class="p">[</span><span class="s1">'y'</span><span class="p">],</span> <span class="n">marker</span><span class="o">=</span><span class="s1">'o'</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">test</span><span class="p">[</span><span class="s1">'x'</span><span class="p">],</span> <span class="n">test</span><span class="p">[</span><span class="s1">'y'</span><span class="p">],</span> <span class="n">marker</span><span class="o">=</span><span class="s1">'^'</span><span class="p">)</span>
+    <span class="n">draw_polynomial</span><span class="p">(</span><span class="n">coefs</span><span class="p">[</span><span class="s1">'value'</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Polynomial coefficients"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">coefs</span><span class="p">[</span><span class="s1">'name'</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="training-a-polynomial-regression-model-with-no-regularization">
+<h2>Training a polynomial regression model with no regularization<a class="headerlink" href="#training-a-polynomial-regression-model-with-no-regularization" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_no_reg</span> <span class="o">=</span> <span class="n">tc</span><span class="o">.</span><span class="n">linear_regression</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+    <span class="n">train</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s1">'y'</span><span class="p">,</span> <span class="n">l1_penalty</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">l2_penalty</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">validation_set</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">display_results</span><span class="p">(</span><span class="n">model_no_reg</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Training error (rmse): 1.5213829303807986
+Testing error (rmse): 699.0325176744669
+</pre></div>
+</div>
+<img alt="../_images/25f18c6a0c1beb7c38a8c23898a2bad0e47631d2868895e8434f74ed1992075d.png" src="../_images/25f18c6a0c1beb7c38a8c23898a2bad0e47631d2868895e8434f74ed1992075d.png" />
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Polynomial coefficients
++-------------+---------------------+
+|     name    |        value        |
++-------------+---------------------+
+| (intercept) |  8.409132643442717  |
+|      x      |  15.877898056607998 |
+|     x^2     |  108.8735358163443  |
+|     x^3     | -212.88678661687192 |
+|     x^4     |  -97.13225053973962 |
+|     x^5     |  258.47096686275455 |
+|     x^6     |  38.335889248828835 |
+|     x^7     | -128.78387647931117 |
+|     x^8     |  -9.214500432847792 |
+|     x^9     |  32.840417055946915 |
++-------------+---------------------+
+[200 rows x 2 columns]
+Note: Only the head of the SFrame is printed.
+You can use print_rows(num_rows=m, num_columns=n) to print more rows and columns.
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="training-a-polynomial-regression-model-with-l1-regularization">
+<h2>Training a polynomial regression model with L1 regularization<a class="headerlink" href="#training-a-polynomial-regression-model-with-l1-regularization" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_L1_reg</span> <span class="o">=</span> <span class="n">tc</span><span class="o">.</span><span class="n">linear_regression</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+    <span class="n">train</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s1">'y'</span><span class="p">,</span> <span class="n">l1_penalty</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">l2_penalty</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">validation_set</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">display_results</span><span class="p">(</span><span class="n">model_L1_reg</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Training error (rmse): 9.473874911154354
+Testing error (rmse): 10.077027617091746
+</pre></div>
+</div>
+<img alt="../_images/2b1977608125b1d552fe15704a7a698ea30863eaf2247cff4eee159fe4688cdb.png" src="../_images/2b1977608125b1d552fe15704a7a698ea30863eaf2247cff4eee159fe4688cdb.png" />
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Polynomial coefficients
++-------------+-------------------------+
+|     name    |          value          |
++-------------+-------------------------+
+| (intercept) |    0.5655798426406278   |
+|      x      |    0.0694081636504658   |
+|     x^2     |  0.0075528368273853445  |
+|     x^3     |   0.003947237269580271  |
+|     x^4     | -0.00021279451431743294 |
+|     x^5     |  0.00019048017792383447 |
+|     x^6     |  -1.798514046251732e-05 |
+|     x^7     |   7.88081493506395e-06  |
+|     x^8     |  -8.895545466589715e-07 |
+|     x^9     |  3.020651102542037e-07  |
++-------------+-------------------------+
+[200 rows x 2 columns]
+Note: Only the head of the SFrame is printed.
+You can use print_rows(num_rows=m, num_columns=n) to print more rows and columns.
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="training-a-polynomial-regression-model-with-l2-regularization">
+<h2>Training a polynomial regression model with L2 regularization<a class="headerlink" href="#training-a-polynomial-regression-model-with-l2-regularization" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_L2_reg</span> <span class="o">=</span> <span class="n">tc</span><span class="o">.</span><span class="n">linear_regression</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+    <span class="n">train</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s1">'y'</span><span class="p">,</span> <span class="n">l1_penalty</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">l2_penalty</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">validation_set</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">display_results</span><span class="p">(</span><span class="n">model_L2_reg</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Training error (rmse): 1.714673638689723
+Testing error (rmse): 3.413615797210576
+</pre></div>
+</div>
+<img alt="../_images/6ccbf82803eff590e28da9a993052aec0c4654c953fa9d64802371fb7a2f03f5.png" src="../_images/6ccbf82803eff590e28da9a993052aec0c4654c953fa9d64802371fb7a2f03f5.png" />
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Polynomial coefficients
++-------------+-------------------------+
+|     name    |          value          |
++-------------+-------------------------+
+| (intercept) |    13.242877632262703   |
+|      x      |    0.8742327276128922   |
+|     x^2     |    -0.519442544052024   |
+|     x^3     |   0.006007308646500496  |
+|     x^4     |  -0.021611699669646676  |
+|     x^5     |  0.0011472313840807627  |
+|     x^6     | -0.00039568239266103136 |
+|     x^7     |  3.537559873068439e-05  |
+|     x^8     |  -1.065260727829058e-07 |
+|     x^9     |  5.825198471939245e-07  |
++-------------+-------------------------+
+[200 rows x 2 columns]
+Note: Only the head of the SFrame is printed.
+You can use print_rows(num_rows=m, num_columns=n) to print more rows and columns.
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="viewing-the-predictions-in-the-testing-set">
+<h2>Viewing the predictions in the testing set<a class="headerlink" href="#viewing-the-predictions-in-the-testing-set" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">predictions</span> <span class="o">=</span> <span class="n">test</span><span class="p">[</span><span class="s1">'x'</span><span class="p">,</span> <span class="s1">'y'</span><span class="p">]</span>
+<span class="n">predictions</span><span class="p">[</span><span class="s1">'No reg'</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_no_reg</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">test</span><span class="p">)</span>
+<span class="n">predictions</span><span class="p">[</span><span class="s1">'L1 reg'</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_L1_reg</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">test</span><span class="p">)</span>
+<span class="n">predictions</span><span class="p">[</span><span class="s1">'L2 reg'</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_L2_reg</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">test</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">predictions</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div style="max-height:1000px;max-width:1500px;overflow:auto;"><table frame="box" rules="cols">
+    <tr>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">x</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">y</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">No reg</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">L1 reg</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">L2 reg</th>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-0.2785728454728664</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">16.36505651355184</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">16.052528555808884</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">0.5467437924583818</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">12.958767791803519</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3.6530992777164</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">4.83366913200435</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1499.3940900560701</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.230320283464282</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">6.450393351997895</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-0.5203042856442961</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">13.47860807272069</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">44.58735982592923</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">0.5309318651483861</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">12.644906915280373</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3.14466863291336</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3.2664703661537313</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-819.6674023489759</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.0254405801644775</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">9.08207753278438</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-1.1509885402733957</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">13.436894195835205</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">79.74336216300665</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">0.4888537292170774</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">11.498079646733478</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3.424602231401824</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">3.5269925176080537</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">-121.30631289217854</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1.1270992482748206</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">7.701281752205773</td>
+    </tr>
+</table>
+[6 rows x 5 columns]<br/>
+</div></div></div>
+</div>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./chapter_04_testing_overfitting_underfitting"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Chapter 4 — Optimizing the training process: Underfitting, overfitting, testing, and regularization</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../chapter_05_perceptron_algorithm/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Chapter 5 — Using lines to split our points: The perceptron algorithm</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-our-dataset">Defining our dataset</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training-a-polynomial-regression-model">Training a polynomial regression model</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-columns-to-our-dataset-corresponding-to-x-2-x-3-ldots-x-200">Adding columns to our dataset corresponding to <span class="math notranslate nohighlight">\(x^2, x^3, \ldots, x^{200}\)</span></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#splitting-data-into-training-and-testing">Splitting data into training and testing</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training-a-polynomial-regression-model-with-no-regularization">Training a polynomial regression model with no regularization</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training-a-polynomial-regression-model-with-l1-regularization">Training a polynomial regression model with L1 regularization</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training-a-polynomial-regression-model-with-l2-regularization">Training a polynomial regression model with L2 regularization</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#viewing-the-predictions-in-the-testing-set">Viewing the predictions in the testing set</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Luis Serrano
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

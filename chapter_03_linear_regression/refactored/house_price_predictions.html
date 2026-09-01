@@ -1,0 +1,1837 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>House Price Predictions with Linear Regression &#8212; Grokking Machine Learning</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=9c3e77be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js?v=b8b12719"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'chapter_03_linear_regression/refactored/house_price_predictions';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="../../_static/GML.jpeg"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="House predictions with linear regression using a toy dataset" href="house_price_predictions_toy.html" />
+    <link rel="prev" title="Chapter 3: Linear Regression for a housing dataset" href="coding_linear_regression.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../intro.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/GML.jpeg" class="logo__image only-light" alt="Grokking Machine Learning - Home"/>
+    <img src="../../_static/GML.jpeg" class="logo__image only-dark pst-js-only" alt="Grokking Machine Learning - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../intro.html">
+                    Grokking Machine Learning
+                </a>
+            </li>
+        </ul>
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Chapter 3 — Drawing a line close to our points: Linear regression</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../coding_linear_regression.html">Chapter 3: Linear Regression for a housing dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../house_price_predictions.html">House predictions with linear regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="coding_linear_regression.html">Chapter 3: Linear Regression for a housing dataset</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">House Price Predictions with Linear Regression</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="house_price_predictions_toy.html">House predictions with linear regression using a toy dataset</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../chapter_04_testing_overfitting_underfitting/index.html">Chapter 4 — Optimizing the training process: Underfitting, overfitting, testing, and regularization</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../chapter_04_testing_overfitting_underfitting/polynomial_regression_regularization.html">Chapter 4: Testing and regularization with Turi Create</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../chapter_05_perceptron_algorithm/index.html">Chapter 5 — Using lines to split our points: The perceptron algorithm</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../chapter_05_perceptron_algorithm/coding_perceptron_algorithm.html">Chapter 5: Sentiment analysis with the perceptron algorithm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../chapter_05_perceptron_algorithm/refactored/coding_perceptron_algorithm.html">Chapter 5: Sentiment analysis with the Perceptron algorithm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../chapter_05_perceptron_algorithm/refactored/sentiment_analysis_toy.html">Sentiment analysis with the Perceptron algorithm &amp; statsmodels</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../chapter_06_logistic_regression/index.html">Chapter 6 — A continuous approach to splitting points: Logistic classifiers</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../chapter_06_logistic_regression/coding_logistic_regression.html">Sentiment analysis with Logistic Regression</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../chapter_06_logistic_regression/sentiment_analysis_imdb.html">Classifying IMDB movie reviews</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../chapter_08_naive_bayes/index.html">Chapter 8 — Using probability to its maximum: The Naive Bayes model</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../chapter_08_naive_bayes/coding_naive_bayes.html">Coding a spam classifier with naive Bayes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../chapter_08_naive_bayes/refactored/coding_naive_bayes.html">1. Calculating prior probabilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../chapter_08_naive_bayes/refactored/spam_email_predictions.html">Predicting Ham vs Spam emails</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../chapter_09_decision_trees/index.html">Chapter 9 — Splitting data by asking questions: Decision trees</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../chapter_09_decision_trees/gini_entropy_calculations.html">Gini index calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../chapter_09_decision_trees/graphical_example.html">A graphical example</a></li>
+
+
+
+<li class="toctree-l2"><a class="reference internal" href="../../chapter_09_decision_trees/app_recommendations.html">App dataset with decision trees</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="../../chapter_09_decision_trees/regression_decision_tree.html">Decision trees for regression</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../chapter_09_decision_trees/university_admissions.html">The dataset</a></li>
+
+
+
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../chapter_10_neural_networks/index.html">Chapter 10 — Combining building blocks to gain more power: Neural networks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../chapter_10_neural_networks/graphical_example.html">A graphical example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../chapter_10_neural_networks/plotting_boundaries.html">Plotting the boundary of a neural network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../chapter_10_neural_networks/image_recognition.html">Building an image recognition neural network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../chapter_10_neural_networks/house_price_predictions_neural_network.html">Using a regression neural network to predict housing prices in Hyderabad</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../chapter_11_support_vector_machines/index.html">Chapter 11 — Finding boundaries with style: Support vector machines and the kernel method</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../chapter_11_support_vector_machines/building_the_datasets.html">Building a linear dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../chapter_11_support_vector_machines/calculating_similarities.html">Calculating the similarity matrix and using it to fit an SVM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../chapter_11_support_vector_machines/svm_graphical_example.html">Building an SVM to separate a linear dataset</a></li>
+
+
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../chapter_12_ensemble_methods/index.html">Chapter 12 — Combining models to maximize results: Ensemble learning</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../chapter_12_ensemble_methods/random_forests_and_adaboost.html">Spam dataset with ensemble methods</a></li>
+
+
+
+
+
+
+
+<li class="toctree-l2"><a class="reference internal" href="../../chapter_12_ensemble_methods/gradient_boosting_and_xgboost.html">Fitting a decision tree</a></li>
+
+
+
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../chapter_13_end_to_end_example/index.html">Chapter 13 — Putting it all in practice: A real life example of data engineering and machine learning</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../chapter_13_end_to_end_example/end_to_end_example.html">13. Machine learning techniques</a></li>
+
+
+
+
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../_sources/chapter_03_linear_regression/refactored/house_price_predictions.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>House Price Predictions with Linear Regression</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">House Price Predictions with Linear Regression</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exploring-the-relationship-between-price-and-area">Exploring the relationship between price and area</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#with-turicreate">With turicreate</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#testing-a-model-with-only-one-feature">Testing a model with only one feature</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#building-a-model-that-uses-all-the-features">Building a model that uses all the features</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#with-statsmodels">With statsmodels</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Testing a model with only one feature</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Building a model that uses all the features</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="house-price-predictions-with-linear-regression">
+<h1>House Price Predictions with Linear Regression<a class="headerlink" href="#house-price-predictions-with-linear-regression" title="Link to this heading">#</a></h1>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">run</span> coding_linear_regression.ipynb 
+<span class="c1"># allows us to use the functions we wrote</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="exploring-the-relationship-between-price-and-area">
+<h2>Exploring the relationship between price and area<a class="headerlink" href="#exploring-the-relationship-between-price-and-area" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">'Hyderabad.csv'</span><span class="p">)</span>
+<span class="n">plot_scatter</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">'Area'</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">'Price'</span><span class="p">],</span> <span class="s2">"Housing Area"</span><span class="p">,</span> <span class="s2">"Housing Price"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/290227c77afbddf69edb1041dbd87e02b49db68301aa63deb3211f2108f6042a.png" src="../../_images/290227c77afbddf69edb1041dbd87e02b49db68301aa63deb3211f2108f6042a.png" />
+</div>
+</div>
+</section>
+<section id="with-turicreate">
+<h2>With turicreate<a class="headerlink" href="#with-turicreate" title="Link to this heading">#</a></h2>
+<section id="testing-a-model-with-only-one-feature">
+<h3>Testing a model with only one feature<a class="headerlink" href="#testing-a-model-with-only-one-feature" title="Link to this heading">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">turicreate</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tc</span>
+<span class="n">data_tc</span> <span class="o">=</span> <span class="n">tc</span><span class="o">.</span><span class="n">SFrame</span><span class="p">(</span><span class="s1">'Hyderabad.csv'</span><span class="p">)</span>
+<span class="n">data</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">simple_model</span> <span class="o">=</span> <span class="n">tc</span><span class="o">.</span><span class="n">linear_regression</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">data_tc</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="p">[</span><span class="s1">'Area'</span><span class="p">],</span> <span class="n">target</span><span class="o">=</span><span class="s1">'Price'</span><span class="p">)</span>
+<span class="n">simple_model</span><span class="o">.</span><span class="n">coefficients</span>
+<span class="n">b</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="n">simple_model</span><span class="o">.</span><span class="n">coefficients</span><span class="p">[</span><span class="s1">'value'</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"slope:"</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"y-intercept:"</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+
+<span class="n">plot_scatter</span><span class="p">(</span><span class="n">data_tc</span><span class="p">[</span><span class="s1">'Area'</span><span class="p">],</span> <span class="n">data_tc</span><span class="p">[</span><span class="s1">'Price'</span><span class="p">])</span>
+<span class="n">draw_line</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">starting</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ending</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">data_tc</span><span class="p">[</span><span class="s1">'Area'</span><span class="p">]))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="building-a-model-that-uses-all-the-features">
+<h3>Building a model that uses all the features<a class="headerlink" href="#building-a-model-that-uses-all-the-features" title="Link to this heading">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">tc</span><span class="o">.</span><span class="n">linear_regression</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s1">'Price'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">coefficients</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">house</span> <span class="o">=</span> <span class="n">tc</span><span class="o">.</span><span class="n">SFrame</span><span class="p">({</span><span class="s1">'Area'</span><span class="p">:</span> <span class="p">[</span><span class="mi">1000</span><span class="p">],</span> <span class="s1">'No. of Bedrooms'</span><span class="p">:[</span><span class="mi">3</span><span class="p">]})</span>
+<span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">house</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section class="tex2jax_ignore mathjax_ignore" id="with-statsmodels">
+<h1>With statsmodels<a class="headerlink" href="#with-statsmodels" title="Link to this heading">#</a></h1>
+<section id="id1">
+<h2>Testing a model with only one feature<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
+<p>statsmodels doesn’t automatically add an intercept (constant bias) column, so we have to add that ourselves.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">statsmodels.api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">exog</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">add_constant</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'Area'</span><span class="p">])</span> <span class="c1"># adds an intercept column</span>
+<span class="n">model_linear_regression</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">OLS</span><span class="p">(</span>
+    <span class="n">endog</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">'Price'</span><span class="p">],</span>
+    <span class="n">exog</span> <span class="o">=</span> <span class="n">exog</span><span class="p">)</span>
+<span class="n">results_regression</span> <span class="o">=</span> <span class="n">model_linear_regression</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results_regression</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><table class="simpletable">
+<caption>OLS Regression Results</caption>
+<tr>
+  <th>Dep. Variable:</th>          <td>Price</td>      <th>  R-squared:         </th> <td>   0.688</td> 
+</tr>
+<tr>
+  <th>Model:</th>                   <td>OLS</td>       <th>  Adj. R-squared:    </th> <td>   0.688</td> 
+</tr>
+<tr>
+  <th>Method:</th>             <td>Least Squares</td>  <th>  F-statistic:       </th> <td>   5542.</td> 
+</tr>
+<tr>
+  <th>Date:</th>             <td>Mon, 05 Jul 2021</td> <th>  Prob (F-statistic):</th>  <td>  0.00</td>  
+</tr>
+<tr>
+  <th>Time:</th>                 <td>17:19:18</td>     <th>  Log-Likelihood:    </th> <td> -42364.</td> 
+</tr>
+<tr>
+  <th>No. Observations:</th>      <td>  2518</td>      <th>  AIC:               </th> <td>8.473e+04</td>
+</tr>
+<tr>
+  <th>Df Residuals:</th>          <td>  2516</td>      <th>  BIC:               </th> <td>8.474e+04</td>
+</tr>
+<tr>
+  <th>Df Model:</th>              <td>     1</td>      <th>                     </th>     <td> </td>    
+</tr>
+<tr>
+  <th>Covariance Type:</th>      <td>nonrobust</td>    <th>                     </th>     <td> </td>    
+</tr>
+</table>
+<table class="simpletable">
+<tr>
+    <td></td>       <th>coef</th>     <th>std err</th>      <th>t</th>      <th>P>|t|</th>  <th>[0.025</th>    <th>0.975]</th>  
+</tr>
+<tr>
+  <th>const</th> <td>-6.223e+06</td> <td> 2.37e+05</td> <td>  -26.298</td> <td> 0.000</td> <td>-6.69e+06</td> <td>-5.76e+06</td>
+</tr>
+<tr>
+  <th>Area</th>  <td> 9753.9406</td> <td>  131.026</td> <td>   74.443</td> <td> 0.000</td> <td> 9497.012</td> <td>    1e+04</td>
+</tr>
+</table>
+<table class="simpletable">
+<tr>
+  <th>Omnibus:</th>       <td>4164.869</td> <th>  Durbin-Watson:     </th>  <td>   1.874</td>  
+</tr>
+<tr>
+  <th>Prob(Omnibus):</th>  <td> 0.000</td>  <th>  Jarque-Bera (JB):  </th> <td>9856160.923</td>
+</tr>
+<tr>
+  <th>Skew:</th>           <td>10.294</td>  <th>  Prob(JB):          </th>  <td>    0.00</td>  
+</tr>
+<tr>
+  <th>Kurtosis:</th>       <td>308.809</td> <th>  Cond. No.          </th>  <td>4.37e+03</td>  
+</tr>
+</table><br/><br/>Notes:<br/>[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.<br/>[2] The condition number is large, 4.37e+03. This might indicate that there are<br/>strong multicollinearity or other numerical problems.</div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results_regression</span><span class="o">.</span><span class="n">params</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>const   -6.222669e+06
+Area     9.753941e+03
+dtype: float64
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_scatter</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">'Area'</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">'Price'</span><span class="p">],</span> <span class="s2">"Housing Area"</span><span class="p">,</span> <span class="s2">"Housing Price"</span><span class="p">)</span>
+<span class="n">draw_line</span><span class="p">(</span><span class="o">*</span><span class="n">results_regression</span><span class="o">.</span><span class="n">params</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">starting</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ending</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'Area'</span><span class="p">]))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/f37635771cffa8f7559a09474b2b72247ff992394ca7cbc50decd8368f14b731.png" src="../../_images/f37635771cffa8f7559a09474b2b72247ff992394ca7cbc50decd8368f14b731.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_scatter</span><span class="p">(</span>
+    <span class="n">results_regression</span><span class="o">.</span><span class="n">fittedvalues</span><span class="p">,</span>
+    <span class="n">results_regression</span><span class="o">.</span><span class="n">resid</span><span class="p">,</span>
+    <span class="n">x_label</span> <span class="o">=</span> <span class="s2">"Fitted Values"</span><span class="p">,</span>
+    <span class="n">y_label</span> <span class="o">=</span> <span class="s2">"Residual Values"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># Not sure why it plots twice</span>
+<span class="n">sm</span><span class="o">.</span><span class="n">qqplot</span><span class="p">(</span><span class="n">results_regression</span><span class="o">.</span><span class="n">resid_pearson</span><span class="p">,</span> <span class="n">line</span> <span class="o">=</span> <span class="s2">"q"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/508ab8b91a7f4128ffe01d432870c65ccd35c6fd674a5a74d20f544e5fa73ad9.png" src="../../_images/508ab8b91a7f4128ffe01d432870c65ccd35c6fd674a5a74d20f544e5fa73ad9.png" />
+<img alt="../../_images/b15fb73081f9c41aafc0266e5b1da9b1aafd997c2c94d5339992298f81711796.png" src="../../_images/b15fb73081f9c41aafc0266e5b1da9b1aafd997c2c94d5339992298f81711796.png" />
+<img alt="../../_images/b15fb73081f9c41aafc0266e5b1da9b1aafd997c2c94d5339992298f81711796.png" src="../../_images/b15fb73081f9c41aafc0266e5b1da9b1aafd997c2c94d5339992298f81711796.png" />
+</div>
+</div>
+<section id="id2">
+<h3>Building a model that uses all the features<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
+<p>statsmodels doesn’t handle categorical values for us, so we need to adjust our dataset using <code class="docutils literal notranslate"><span class="pre">pandas.get_dummies()</span></code></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">exog</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">exog</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">add_constant</span><span class="p">(</span><span class="n">exog</span><span class="p">)</span> <span class="c1"># adds an intercept column</span>
+<span class="n">exog</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">exog</span><span class="p">)</span> <span class="c1"># Converts categorical to one-hot</span>
+<span class="n">endog</span> <span class="o">=</span> <span class="n">exog</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"Price"</span><span class="p">)</span>
+
+<span class="n">model_linear_regression</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">OLS</span><span class="p">(</span>
+    <span class="n">endog</span> <span class="o">=</span> <span class="n">endog</span><span class="p">,</span>
+    <span class="n">exog</span> <span class="o">=</span> <span class="n">exog</span><span class="p">)</span>
+<span class="n">results_regression</span> <span class="o">=</span> <span class="n">model_linear_regression</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results_regression</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span> <span class="c1"># yields a very large printout</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><table class="simpletable">
+<caption>OLS Regression Results</caption>
+<tr>
+  <th>Dep. Variable:</th>          <td>Price</td>      <th>  R-squared:         </th> <td>   0.769</td> 
+</tr>
+<tr>
+  <th>Model:</th>                   <td>OLS</td>       <th>  Adj. R-squared:    </th> <td>   0.741</td> 
+</tr>
+<tr>
+  <th>Method:</th>             <td>Least Squares</td>  <th>  F-statistic:       </th> <td>   26.67</td> 
+</tr>
+<tr>
+  <th>Date:</th>             <td>Mon, 05 Jul 2021</td> <th>  Prob (F-statistic):</th>  <td>  0.00</td>  
+</tr>
+<tr>
+  <th>Time:</th>                 <td>17:19:50</td>     <th>  Log-Likelihood:    </th> <td> -41982.</td> 
+</tr>
+<tr>
+  <th>No. Observations:</th>      <td>  2518</td>      <th>  AIC:               </th> <td>8.453e+04</td>
+</tr>
+<tr>
+  <th>Df Residuals:</th>          <td>  2237</td>      <th>  BIC:               </th> <td>8.616e+04</td>
+</tr>
+<tr>
+  <th>Df Model:</th>              <td>   280</td>      <th>                     </th>     <td> </td>    
+</tr>
+<tr>
+  <th>Covariance Type:</th>      <td>nonrobust</td>    <th>                     </th>     <td> </td>    
+</tr>
+</table>
+<table class="simpletable">
+<tr>
+                        <td></td>                           <th>coef</th>     <th>std err</th>      <th>t</th>      <th>P>|t|</th>  <th>[0.025</th>    <th>0.975]</th>  
+</tr>
+<tr>
+  <th>const</th>                                         <td>-2.172e+06</td> <td> 5.23e+05</td> <td>   -4.156</td> <td> 0.000</td> <td> -3.2e+06</td> <td>-1.15e+06</td>
+</tr>
+<tr>
+  <th>Area</th>                                          <td> 9017.1039</td> <td>  250.019</td> <td>   36.066</td> <td> 0.000</td> <td> 8526.809</td> <td> 9507.398</td>
+</tr>
+<tr>
+  <th>No. of Bedrooms</th>                               <td>-1.403e+06</td> <td> 2.52e+05</td> <td>   -5.566</td> <td> 0.000</td> <td> -1.9e+06</td> <td>-9.08e+05</td>
+</tr>
+<tr>
+  <th>Resale</th>                                        <td> 1.167e+06</td> <td> 2.93e+05</td> <td>    3.990</td> <td> 0.000</td> <td> 5.93e+05</td> <td> 1.74e+06</td>
+</tr>
+<tr>
+  <th>MaintenanceStaff</th>                              <td>-9.871e+05</td> <td> 4.11e+05</td> <td>   -2.404</td> <td> 0.016</td> <td>-1.79e+06</td> <td>-1.82e+05</td>
+</tr>
+<tr>
+  <th>Gymnasium</th>                                     <td>-5.717e+05</td> <td>  5.5e+05</td> <td>   -1.039</td> <td> 0.299</td> <td>-1.65e+06</td> <td> 5.08e+05</td>
+</tr>
+<tr>
+  <th>SwimmingPool</th>                                  <td> 1722.0297</td> <td> 5.43e+05</td> <td>    0.003</td> <td> 0.997</td> <td>-1.06e+06</td> <td> 1.07e+06</td>
+</tr>
+<tr>
+  <th>LandscapedGardens</th>                             <td> 8.866e+05</td> <td> 4.43e+05</td> <td>    2.003</td> <td> 0.045</td> <td> 1.84e+04</td> <td> 1.75e+06</td>
+</tr>
+<tr>
+  <th>JoggingTrack</th>                                  <td>-3.095e+05</td> <td> 4.77e+05</td> <td>   -0.649</td> <td> 0.517</td> <td>-1.25e+06</td> <td> 6.26e+05</td>
+</tr>
+<tr>
+  <th>RainWaterHarvesting</th>                           <td>-4.642e+05</td> <td>  4.4e+05</td> <td>   -1.056</td> <td> 0.291</td> <td>-1.33e+06</td> <td> 3.98e+05</td>
+</tr>
+<tr>
+  <th>IndoorGames</th>                                   <td> 2.855e+05</td> <td> 4.76e+05</td> <td>    0.600</td> <td> 0.548</td> <td>-6.47e+05</td> <td> 1.22e+06</td>
+</tr>
+<tr>
+  <th>ShoppingMall</th>                                  <td> 6.725e+05</td> <td> 7.59e+05</td> <td>    0.886</td> <td> 0.376</td> <td>-8.16e+05</td> <td> 2.16e+06</td>
+</tr>
+<tr>
+  <th>Intercom</th>                                      <td>-1.022e+05</td> <td> 3.46e+05</td> <td>   -0.295</td> <td> 0.768</td> <td>-7.82e+05</td> <td> 5.77e+05</td>
+</tr>
+<tr>
+  <th>SportsFacility</th>                                <td>-5.126e+04</td> <td> 3.87e+05</td> <td>   -0.132</td> <td> 0.895</td> <td>-8.11e+05</td> <td> 7.08e+05</td>
+</tr>
+<tr>
+  <th>ATM</th>                                           <td>-4.497e+05</td> <td> 5.26e+05</td> <td>   -0.855</td> <td> 0.393</td> <td>-1.48e+06</td> <td> 5.82e+05</td>
+</tr>
+<tr>
+  <th>ClubHouse</th>                                     <td> 4.043e+05</td> <td> 5.12e+05</td> <td>    0.790</td> <td> 0.430</td> <td>-5.99e+05</td> <td> 1.41e+06</td>
+</tr>
+<tr>
+  <th>School</th>                                        <td>-2.704e+06</td> <td> 1.28e+06</td> <td>   -2.107</td> <td> 0.035</td> <td>-5.22e+06</td> <td>-1.87e+05</td>
+</tr>
+<tr>
+  <th>24X7Security</th>                                  <td>-1.453e+05</td> <td> 5.02e+05</td> <td>   -0.290</td> <td> 0.772</td> <td>-1.13e+06</td> <td> 8.39e+05</td>
+</tr>
+<tr>
+  <th>PowerBackup</th>                                   <td> 1.727e+05</td> <td>  3.8e+05</td> <td>    0.454</td> <td> 0.650</td> <td>-5.73e+05</td> <td> 9.18e+05</td>
+</tr>
+<tr>
+  <th>CarParking</th>                                    <td>-2.183e+05</td> <td> 4.66e+05</td> <td>   -0.469</td> <td> 0.639</td> <td>-1.13e+06</td> <td> 6.95e+05</td>
+</tr>
+<tr>
+  <th>StaffQuarter</th>                                  <td> 7.038e+05</td> <td> 4.86e+05</td> <td>    1.448</td> <td> 0.148</td> <td> -2.5e+05</td> <td> 1.66e+06</td>
+</tr>
+<tr>
+  <th>Cafeteria</th>                                     <td> 1.282e+06</td> <td> 4.76e+05</td> <td>    2.694</td> <td> 0.007</td> <td> 3.49e+05</td> <td> 2.22e+06</td>
+</tr>
+<tr>
+  <th>MultipurposeRoom</th>                              <td>  2.64e+05</td> <td> 4.22e+05</td> <td>    0.625</td> <td> 0.532</td> <td>-5.64e+05</td> <td> 1.09e+06</td>
+</tr>
+<tr>
+  <th>Hospital</th>                                      <td> 1.685e+06</td> <td> 1.19e+06</td> <td>    1.413</td> <td> 0.158</td> <td>-6.54e+05</td> <td> 4.02e+06</td>
+</tr>
+<tr>
+  <th>WashingMachine</th>                                <td> 6.964e+05</td> <td> 1.29e+06</td> <td>    0.539</td> <td> 0.590</td> <td>-1.84e+06</td> <td> 3.23e+06</td>
+</tr>
+<tr>
+  <th>Gasconnection</th>                                 <td> 7.536e+05</td> <td> 4.67e+05</td> <td>    1.615</td> <td> 0.106</td> <td>-1.61e+05</td> <td> 1.67e+06</td>
+</tr>
+<tr>
+  <th>AC</th>                                            <td> 7.251e+05</td> <td> 7.37e+05</td> <td>    0.983</td> <td> 0.326</td> <td>-7.21e+05</td> <td> 2.17e+06</td>
+</tr>
+<tr>
+  <th>Wifi</th>                                          <td> 4.168e+05</td> <td> 7.15e+05</td> <td>    0.583</td> <td> 0.560</td> <td>-9.85e+05</td> <td> 1.82e+06</td>
+</tr>
+<tr>
+  <th>Children'splayarea</th>                            <td> 8.105e+05</td> <td> 4.45e+05</td> <td>    1.823</td> <td> 0.068</td> <td>-6.15e+04</td> <td> 1.68e+06</td>
+</tr>
+<tr>
+  <th>LiftAvailable</th>                                 <td>-5.573e+05</td> <td> 3.76e+05</td> <td>   -1.481</td> <td> 0.139</td> <td> -1.3e+06</td> <td> 1.81e+05</td>
+</tr>
+<tr>
+  <th>BED</th>                                           <td> 2.361e+06</td> <td> 6.43e+05</td> <td>    3.674</td> <td> 0.000</td> <td>  1.1e+06</td> <td> 3.62e+06</td>
+</tr>
+<tr>
+  <th>VaastuCompliant</th>                               <td> 2.822e+05</td> <td> 4.26e+05</td> <td>    0.663</td> <td> 0.508</td> <td>-5.53e+05</td> <td> 1.12e+06</td>
+</tr>
+<tr>
+  <th>Microwave</th>                                     <td>-1.524e+06</td> <td> 7.51e+05</td> <td>   -2.028</td> <td> 0.043</td> <td>   -3e+06</td> <td>-5.03e+04</td>
+</tr>
+<tr>
+  <th>GolfCourse</th>                                    <td>-2.327e+06</td> <td> 7.82e+05</td> <td>   -2.975</td> <td> 0.003</td> <td>-3.86e+06</td> <td>-7.93e+05</td>
+</tr>
+<tr>
+  <th>TV</th>                                            <td> 8.768e+05</td> <td> 1.04e+06</td> <td>    0.840</td> <td> 0.401</td> <td>-1.17e+06</td> <td> 2.92e+06</td>
+</tr>
+<tr>
+  <th>DiningTable</th>                                   <td>-1.188e+06</td> <td> 1.08e+06</td> <td>   -1.099</td> <td> 0.272</td> <td>-3.31e+06</td> <td> 9.32e+05</td>
+</tr>
+<tr>
+  <th>Sofa</th>                                          <td>-1.388e+06</td> <td> 9.51e+05</td> <td>   -1.461</td> <td> 0.144</td> <td>-3.25e+06</td> <td> 4.76e+05</td>
+</tr>
+<tr>
+  <th>Wardrobe</th>                                      <td>-5.056e+05</td> <td> 6.84e+05</td> <td>   -0.739</td> <td> 0.460</td> <td>-1.85e+06</td> <td> 8.36e+05</td>
+</tr>
+<tr>
+  <th>Refrigerator</th>                                  <td> 7.591e+04</td> <td> 1.35e+06</td> <td>    0.056</td> <td> 0.955</td> <td>-2.56e+06</td> <td> 2.71e+06</td>
+</tr>
+<tr>
+  <th>Location_ALIND Employees Colony</th>               <td> 1.965e+06</td> <td> 4.48e+06</td> <td>    0.439</td> <td> 0.661</td> <td>-6.82e+06</td> <td> 1.08e+07</td>
+</tr>
+<tr>
+  <th>Location_AS Rao Nagar</th>                         <td>-2.667e+05</td> <td> 1.73e+06</td> <td>   -0.154</td> <td> 0.877</td> <td>-3.65e+06</td> <td> 3.12e+06</td>
+</tr>
+<tr>
+  <th>Location_Abids</th>                                <td> 1.792e+07</td> <td>  4.5e+06</td> <td>    3.986</td> <td> 0.000</td> <td>  9.1e+06</td> <td> 2.67e+07</td>
+</tr>
+<tr>
+  <th>Location_Adda Gutta</th>                           <td>-2.673e+06</td> <td> 4.66e+06</td> <td>   -0.573</td> <td> 0.566</td> <td>-1.18e+07</td> <td> 6.47e+06</td>
+</tr>
+<tr>
+  <th>Location_Adibatla</th>                             <td>-1.494e+06</td> <td> 1.22e+06</td> <td>   -1.224</td> <td> 0.221</td> <td>-3.89e+06</td> <td>    9e+05</td>
+</tr>
+<tr>
+  <th>Location_Alapathi Nagar</th>                       <td>-2.013e+06</td> <td> 4.48e+06</td> <td>   -0.449</td> <td> 0.653</td> <td>-1.08e+07</td> <td> 6.78e+06</td>
+</tr>
+<tr>
+  <th>Location_Alkapur township</th>                     <td> 5.867e+04</td> <td> 3.22e+06</td> <td>    0.018</td> <td> 0.985</td> <td>-6.25e+06</td> <td> 6.37e+06</td>
+</tr>
+<tr>
+  <th>Location_Allwyn Colony</th>                        <td> 8.766e+05</td> <td> 2.63e+06</td> <td>    0.333</td> <td> 0.739</td> <td>-4.28e+06</td> <td> 6.04e+06</td>
+</tr>
+<tr>
+  <th>Location_Almasguda</th>                            <td>-5.462e+05</td> <td> 4.49e+06</td> <td>   -0.122</td> <td> 0.903</td> <td>-9.36e+06</td> <td> 8.27e+06</td>
+</tr>
+<tr>
+  <th>Location_Alwal</th>                                <td>-1.498e+06</td> <td> 1.09e+06</td> <td>   -1.374</td> <td> 0.170</td> <td>-3.63e+06</td> <td>  6.4e+05</td>
+</tr>
+<tr>
+  <th>Location_Ambedkar Nagar</th>                       <td>-4.461e+05</td> <td> 4.52e+06</td> <td>   -0.099</td> <td> 0.921</td> <td>-9.31e+06</td> <td> 8.42e+06</td>
+</tr>
+<tr>
+  <th>Location_Amberpet</th>                             <td> 1.662e+06</td> <td> 2.59e+06</td> <td>    0.641</td> <td> 0.521</td> <td>-3.42e+06</td> <td> 6.74e+06</td>
+</tr>
+<tr>
+  <th>Location_Ameenpur</th>                             <td>-1.281e+04</td> <td> 4.51e+06</td> <td>   -0.003</td> <td> 0.998</td> <td>-8.86e+06</td> <td> 8.84e+06</td>
+</tr>
+<tr>
+  <th>Location_Ameerpet</th>                             <td>-4.271e+06</td> <td> 4.54e+06</td> <td>   -0.940</td> <td> 0.347</td> <td>-1.32e+07</td> <td> 4.64e+06</td>
+</tr>
+<tr>
+  <th>Location_Aminpur</th>                              <td>-9.626e+05</td> <td> 1.09e+06</td> <td>   -0.881</td> <td> 0.378</td> <td> -3.1e+06</td> <td> 1.18e+06</td>
+</tr>
+<tr>
+  <th>Location_Appa Junction</th>                        <td> 8.271e+05</td> <td> 8.35e+05</td> <td>    0.990</td> <td> 0.322</td> <td>-8.11e+05</td> <td> 2.46e+06</td>
+</tr>
+<tr>
+  <th>Location_Appa Junction Peerancheru</th>            <td>-9.959e+05</td> <td> 1.21e+06</td> <td>   -0.823</td> <td> 0.411</td> <td>-3.37e+06</td> <td> 1.38e+06</td>
+</tr>
+<tr>
+  <th>Location_Arvind Nagar Colony</th>                  <td> 6.145e+05</td> <td> 4.48e+06</td> <td>    0.137</td> <td> 0.891</td> <td>-8.17e+06</td> <td>  9.4e+06</td>
+</tr>
+<tr>
+  <th>Location_Ashok Nagar</th>                          <td> 2.973e+06</td> <td> 1.61e+06</td> <td>    1.850</td> <td> 0.065</td> <td>-1.79e+05</td> <td> 6.13e+06</td>
+</tr>
+<tr>
+  <th>Location_Attapur</th>                              <td>-1.554e+06</td> <td> 1.14e+06</td> <td>   -1.365</td> <td> 0.173</td> <td>-3.79e+06</td> <td> 6.79e+05</td>
+</tr>
+<tr>
+  <th>Location_Aushapur</th>                             <td>-2.285e+05</td> <td> 3.16e+06</td> <td>   -0.072</td> <td> 0.942</td> <td>-6.43e+06</td> <td> 5.97e+06</td>
+</tr>
+<tr>
+  <th>Location_BHEL</th>                                 <td>-5.922e+05</td> <td> 3.17e+06</td> <td>   -0.187</td> <td> 0.852</td> <td>-6.81e+06</td> <td> 5.63e+06</td>
+</tr>
+<tr>
+  <th>Location_BK Guda Internal Road</th>                <td>-1.567e+06</td> <td> 2.61e+06</td> <td>   -0.601</td> <td> 0.548</td> <td>-6.68e+06</td> <td> 3.54e+06</td>
+</tr>
+<tr>
+  <th>Location_BK Guda Road</th>                         <td>-1.651e+05</td> <td>  2.6e+06</td> <td>   -0.063</td> <td> 0.949</td> <td>-5.27e+06</td> <td> 4.94e+06</td>
+</tr>
+<tr>
+  <th>Location_Bachupally</th>                           <td> -9.94e+05</td> <td> 8.93e+05</td> <td>   -1.113</td> <td> 0.266</td> <td>-2.74e+06</td> <td> 7.57e+05</td>
+</tr>
+<tr>
+  <th>Location_Bachupally Road</th>                      <td> -1.25e+06</td> <td> 6.77e+05</td> <td>   -1.846</td> <td> 0.065</td> <td>-2.58e+06</td> <td> 7.79e+04</td>
+</tr>
+<tr>
+  <th>Location_Bachupaly Road Miyapur</th>               <td>  1.31e+05</td> <td> 4.51e+06</td> <td>    0.029</td> <td> 0.977</td> <td>-8.71e+06</td> <td> 8.98e+06</td>
+</tr>
+<tr>
+  <th>Location_Bagh Amberpet</th>                        <td>-3.017e+06</td> <td> 2.63e+06</td> <td>   -1.148</td> <td> 0.251</td> <td>-8.17e+06</td> <td> 2.14e+06</td>
+</tr>
+<tr>
+  <th>Location_Baghlingampally</th>                      <td>-3.349e+05</td> <td> 4.53e+06</td> <td>   -0.074</td> <td> 0.941</td> <td>-9.21e+06</td> <td> 8.54e+06</td>
+</tr>
+<tr>
+  <th>Location_Balaji Hills Colony Venkatraya Nagar</th> <td>-1.402e+04</td> <td> 4.49e+06</td> <td>   -0.003</td> <td> 0.998</td> <td>-8.83e+06</td> <td>  8.8e+06</td>
+</tr>
+<tr>
+  <th>Location_Balanagar</th>                            <td>-1.506e+06</td> <td> 1.19e+06</td> <td>   -1.268</td> <td> 0.205</td> <td>-3.83e+06</td> <td> 8.23e+05</td>
+</tr>
+<tr>
+  <th>Location_Balapur</th>                              <td>-1.908e+06</td> <td> 4.46e+06</td> <td>   -0.427</td> <td> 0.669</td> <td>-1.07e+07</td> <td> 6.85e+06</td>
+</tr>
+<tr>
+  <th>Location_Bandlaguda Jagir</th>                     <td> -1.88e+06</td> <td> 1.21e+06</td> <td>   -1.557</td> <td> 0.120</td> <td>-4.25e+06</td> <td> 4.87e+05</td>
+</tr>
+<tr>
+  <th>Location_Banjara Hills</th>                        <td>  9.39e+06</td> <td> 7.57e+05</td> <td>   12.412</td> <td> 0.000</td> <td> 7.91e+06</td> <td> 1.09e+07</td>
+</tr>
+<tr>
+  <th>Location_Banjara Hills Road Number 12</th>         <td>  9.11e+06</td> <td> 4.53e+06</td> <td>    2.010</td> <td> 0.045</td> <td> 2.24e+05</td> <td>  1.8e+07</td>
+</tr>
+<tr>
+  <th>Location_Barkatpura</th>                           <td> 6.669e+05</td> <td> 2.67e+06</td> <td>    0.250</td> <td> 0.803</td> <td>-4.56e+06</td> <td>  5.9e+06</td>
+</tr>
+<tr>
+  <th>Location_Basheer Bagh</th>                         <td> 4.023e+06</td> <td> 4.67e+06</td> <td>    0.861</td> <td> 0.389</td> <td>-5.14e+06</td> <td> 1.32e+07</td>
+</tr>
+<tr>
+  <th>Location_Beeramguda</th>                           <td>-1.127e+06</td> <td> 6.89e+05</td> <td>   -1.637</td> <td> 0.102</td> <td>-2.48e+06</td> <td> 2.24e+05</td>
+</tr>
+<tr>
+  <th>Location_Beeramguda Road</th>                      <td>-1.594e+06</td> <td> 4.48e+06</td> <td>   -0.356</td> <td> 0.722</td> <td>-1.04e+07</td> <td> 7.18e+06</td>
+</tr>
+<tr>
+  <th>Location_Begumpet</th>                             <td>  1.16e+06</td> <td> 1.06e+06</td> <td>    1.092</td> <td> 0.275</td> <td>-9.24e+05</td> <td> 3.24e+06</td>
+</tr>
+<tr>
+  <th>Location_Boduppal</th>                             <td>-5.938e+05</td> <td>  1.6e+06</td> <td>   -0.370</td> <td> 0.711</td> <td>-3.74e+06</td> <td> 2.55e+06</td>
+</tr>
+<tr>
+  <th>Location_Boiguda</th>                              <td> 1.788e+07</td> <td> 4.62e+06</td> <td>    3.873</td> <td> 0.000</td> <td> 8.83e+06</td> <td> 2.69e+07</td>
+</tr>
+<tr>
+  <th>Location_Bolarum</th>                              <td>-2.225e+06</td> <td> 2.05e+06</td> <td>   -1.087</td> <td> 0.277</td> <td>-6.24e+06</td> <td> 1.79e+06</td>
+</tr>
+<tr>
+  <th>Location_Bollaram</th>                             <td>-3.752e+06</td> <td> 3.16e+06</td> <td>   -1.187</td> <td> 0.235</td> <td>-9.95e+06</td> <td> 2.45e+06</td>
+</tr>
+<tr>
+  <th>Location_Bongloor</th>                             <td> -7.93e+05</td> <td>  4.5e+06</td> <td>   -0.176</td> <td> 0.860</td> <td>-9.62e+06</td> <td> 8.03e+06</td>
+</tr>
+<tr>
+  <th>Location_Bowenpally</th>                           <td>-1.741e+05</td> <td> 3.18e+06</td> <td>   -0.055</td> <td> 0.956</td> <td>-6.42e+06</td> <td> 6.07e+06</td>
+</tr>
+<tr>
+  <th>Location_Central Excise Colony Hyderabad</th>      <td> 7.791e+05</td> <td> 3.23e+06</td> <td>    0.241</td> <td> 0.810</td> <td>-5.56e+06</td> <td> 7.12e+06</td>
+</tr>
+<tr>
+  <th>Location_Chaitanyapuri</th>                        <td>-3.028e+06</td> <td>  1.7e+06</td> <td>   -1.780</td> <td> 0.075</td> <td>-6.36e+06</td> <td> 3.07e+05</td>
+</tr>
+<tr>
+  <th>Location_Chandanagar</th>                          <td> 2.349e+06</td> <td> 1.12e+06</td> <td>    2.094</td> <td> 0.036</td> <td> 1.49e+05</td> <td> 4.55e+06</td>
+</tr>
+<tr>
+  <th>Location_Cherlapalli</th>                          <td>-3.622e+06</td> <td> 3.17e+06</td> <td>   -1.144</td> <td> 0.253</td> <td>-9.83e+06</td> <td> 2.59e+06</td>
+</tr>
+<tr>
+  <th>Location_Chikkadapally</th>                        <td> 5.351e+06</td> <td> 4.48e+06</td> <td>    1.195</td> <td> 0.232</td> <td>-3.43e+06</td> <td> 1.41e+07</td>
+</tr>
+<tr>
+  <th>Location_Chintalakunta</th>                        <td> 8.134e+05</td> <td> 4.46e+06</td> <td>    0.182</td> <td> 0.855</td> <td>-7.94e+06</td> <td> 9.56e+06</td>
+</tr>
+<tr>
+  <th>Location_Chintalmet</th>                           <td> -3.16e+06</td> <td> 4.46e+06</td> <td>   -0.708</td> <td> 0.479</td> <td>-1.19e+07</td> <td>  5.6e+06</td>
+</tr>
+<tr>
+  <th>Location_Chinthal Basthi</th>                      <td> 1.112e+06</td> <td> 4.46e+06</td> <td>    0.249</td> <td> 0.803</td> <td>-7.64e+06</td> <td> 9.86e+06</td>
+</tr>
+<tr>
+  <th>Location_Chintradripet</th>                        <td>-2.392e+05</td> <td> 4.46e+06</td> <td>   -0.054</td> <td> 0.957</td> <td>-8.99e+06</td> <td> 8.51e+06</td>
+</tr>
+<tr>
+  <th>Location_Chititra Medchal</th>                     <td>-5.218e+05</td> <td> 4.46e+06</td> <td>   -0.117</td> <td> 0.907</td> <td>-9.28e+06</td> <td> 8.23e+06</td>
+</tr>
+<tr>
+  <th>Location_D D Colony</th>                           <td> 1.018e+06</td> <td> 4.49e+06</td> <td>    0.227</td> <td> 0.821</td> <td>-7.78e+06</td> <td> 9.82e+06</td>
+</tr>
+<tr>
+  <th>Location_DD Colony</th>                            <td>-1.214e+06</td> <td> 3.23e+06</td> <td>   -0.376</td> <td> 0.707</td> <td>-7.55e+06</td> <td> 5.12e+06</td>
+</tr>
+<tr>
+  <th>Location_Dammaiguda</th>                           <td>-1.794e+06</td> <td> 2.37e+06</td> <td>   -0.756</td> <td> 0.450</td> <td>-6.45e+06</td> <td> 2.86e+06</td>
+</tr>
+<tr>
+  <th>Location_Darga Khaliz Khan</th>                    <td> 1.081e+06</td> <td> 1.44e+06</td> <td>    0.751</td> <td> 0.453</td> <td>-1.74e+06</td> <td>  3.9e+06</td>
+</tr>
+<tr>
+  <th>Location_Dilsukh Nagar</th>                        <td> 2.865e+06</td> <td> 3.18e+06</td> <td>    0.902</td> <td> 0.367</td> <td>-3.36e+06</td> <td> 9.09e+06</td>
+</tr>
+<tr>
+  <th>Location_Domalguda</th>                            <td>  2.23e+06</td> <td>  2.6e+06</td> <td>    0.857</td> <td> 0.392</td> <td>-2.87e+06</td> <td> 7.33e+06</td>
+</tr>
+<tr>
+  <th>Location_Domalguda Road</th>                       <td> 1.994e+06</td> <td> 4.46e+06</td> <td>    0.447</td> <td> 0.655</td> <td>-6.76e+06</td> <td> 1.07e+07</td>
+</tr>
+<tr>
+  <th>Location_Dr A S Rao Nagar Rd</th>                  <td> 7.608e+05</td> <td> 4.46e+06</td> <td>    0.170</td> <td> 0.865</td> <td>-7.99e+06</td> <td> 9.51e+06</td>
+</tr>
+<tr>
+  <th>Location_Dullapally</th>                           <td> 2.541e+06</td> <td>  4.6e+06</td> <td>    0.553</td> <td> 0.581</td> <td>-6.48e+06</td> <td> 1.16e+07</td>
+</tr>
+<tr>
+  <th>Location_ECIL</th>                                 <td>-1.437e+06</td> <td> 1.51e+06</td> <td>   -0.950</td> <td> 0.342</td> <td> -4.4e+06</td> <td> 1.53e+06</td>
+</tr>
+<tr>
+  <th>Location_ECIL Cross Road</th>                      <td>-5.903e+05</td> <td> 2.26e+06</td> <td>   -0.262</td> <td> 0.794</td> <td>-5.01e+06</td> <td> 3.83e+06</td>
+</tr>
+<tr>
+  <th>Location_ECIL Main Road</th>                       <td>-1.563e+05</td> <td> 1.85e+06</td> <td>   -0.084</td> <td> 0.933</td> <td>-3.79e+06</td> <td> 3.48e+06</td>
+</tr>
+<tr>
+  <th>Location_East Marredpally</th>                     <td> 1.129e+06</td> <td> 1.24e+06</td> <td>    0.910</td> <td> 0.363</td> <td> -1.3e+06</td> <td> 3.56e+06</td>
+</tr>
+<tr>
+  <th>Location_Film Nagar</th>                           <td> 1.009e+07</td> <td>  3.2e+06</td> <td>    3.154</td> <td> 0.002</td> <td> 3.81e+06</td> <td> 1.64e+07</td>
+</tr>
+<tr>
+  <th>Location_Gachibowli</th>                           <td> 3.606e+06</td> <td> 6.01e+05</td> <td>    5.998</td> <td> 0.000</td> <td> 2.43e+06</td> <td> 4.78e+06</td>
+</tr>
+<tr>
+  <th>Location_Gajularamaram</th>                        <td> 2.361e+05</td> <td>  7.3e+05</td> <td>    0.324</td> <td> 0.746</td> <td>-1.19e+06</td> <td> 1.67e+06</td>
+</tr>
+<tr>
+  <th>Location_Gajulramaram Kukatpally</th>              <td> 1.023e+06</td> <td> 1.76e+06</td> <td>    0.580</td> <td> 0.562</td> <td>-2.43e+06</td> <td> 4.48e+06</td>
+</tr>
+<tr>
+  <th>Location_Gandipet</th>                             <td>-1.753e+06</td> <td> 1.55e+06</td> <td>   -1.127</td> <td> 0.260</td> <td> -4.8e+06</td> <td>  1.3e+06</td>
+</tr>
+<tr>
+  <th>Location_Ghansi Bazaar</th>                        <td> 1.684e+06</td> <td> 4.47e+06</td> <td>    0.377</td> <td> 0.706</td> <td>-7.08e+06</td> <td> 1.04e+07</td>
+</tr>
+<tr>
+  <th>Location_Gopal Nagar</th>                          <td> 4.049e+06</td> <td> 4.71e+06</td> <td>    0.859</td> <td> 0.390</td> <td>-5.19e+06</td> <td> 1.33e+07</td>
+</tr>
+<tr>
+  <th>Location_Gopanpally</th>                           <td> 1.786e+06</td> <td>  2.1e+06</td> <td>    0.851</td> <td> 0.395</td> <td>-2.33e+06</td> <td>  5.9e+06</td>
+</tr>
+<tr>
+  <th>Location_Gurramguda</th>                           <td>  2.52e+06</td> <td> 4.49e+06</td> <td>    0.561</td> <td> 0.575</td> <td>-6.29e+06</td> <td> 1.13e+07</td>
+</tr>
+<tr>
+  <th>Location_HMT Hills</th>                            <td> 5.911e+05</td> <td> 4.48e+06</td> <td>    0.132</td> <td> 0.895</td> <td>-8.19e+06</td> <td> 9.37e+06</td>
+</tr>
+<tr>
+  <th>Location_Habsiguda</th>                            <td> 8.764e+05</td> <td> 1.52e+06</td> <td>    0.578</td> <td> 0.563</td> <td> -2.1e+06</td> <td> 3.85e+06</td>
+</tr>
+<tr>
+  <th>Location_Hafeezpet</th>                            <td> 1.625e+06</td> <td> 2.26e+06</td> <td>    0.718</td> <td> 0.473</td> <td>-2.81e+06</td> <td> 6.06e+06</td>
+</tr>
+<tr>
+  <th>Location_Hakimpet</th>                             <td>-1.154e+06</td> <td> 4.47e+06</td> <td>   -0.258</td> <td> 0.796</td> <td>-9.91e+06</td> <td>  7.6e+06</td>
+</tr>
+<tr>
+  <th>Location_Happy Homes Colony</th>                   <td>-5.075e+05</td> <td> 4.49e+06</td> <td>   -0.113</td> <td> 0.910</td> <td>-9.31e+06</td> <td>  8.3e+06</td>
+</tr>
+<tr>
+  <th>Location_Hastinapur</th>                           <td>-1.369e+05</td> <td> 4.46e+06</td> <td>   -0.031</td> <td> 0.976</td> <td>-8.89e+06</td> <td> 8.62e+06</td>
+</tr>
+<tr>
+  <th>Location_Himayat Nagar</th>                        <td> -1.42e+06</td> <td> 1.85e+06</td> <td>   -0.766</td> <td> 0.444</td> <td>-5.06e+06</td> <td> 2.21e+06</td>
+</tr>
+<tr>
+  <th>Location_Hitech City</th>                          <td> 4.037e+06</td> <td> 6.48e+05</td> <td>    6.232</td> <td> 0.000</td> <td> 2.77e+06</td> <td> 5.31e+06</td>
+</tr>
+<tr>
+  <th>Location_Hitex Road</th>                           <td> 2.369e+06</td> <td> 4.58e+06</td> <td>    0.518</td> <td> 0.605</td> <td> -6.6e+06</td> <td> 1.13e+07</td>
+</tr>
+<tr>
+  <th>Location_Hyder Nagar</th>                          <td> 8.366e+05</td> <td> 2.01e+06</td> <td>    0.416</td> <td> 0.677</td> <td> -3.1e+06</td> <td> 4.78e+06</td>
+</tr>
+<tr>
+  <th>Location_Hydershakote</th>                         <td>-3.027e+06</td> <td> 4.51e+06</td> <td>   -0.671</td> <td> 0.502</td> <td>-1.19e+07</td> <td> 5.82e+06</td>
+</tr>
+<tr>
+  <th>Location_IDPL Colony</th>                          <td> 5.645e+05</td> <td> 4.51e+06</td> <td>    0.125</td> <td> 0.901</td> <td>-8.29e+06</td> <td> 9.42e+06</td>
+</tr>
+<tr>
+  <th>Location_Isnapur</th>                              <td>-2.142e+06</td> <td> 4.46e+06</td> <td>   -0.480</td> <td> 0.631</td> <td>-1.09e+07</td> <td> 6.61e+06</td>
+</tr>
+<tr>
+  <th>Location_JNTU</th>                                 <td>  1.85e+06</td> <td> 4.49e+06</td> <td>    0.412</td> <td> 0.680</td> <td>-6.95e+06</td> <td> 1.07e+07</td>
+</tr>
+<tr>
+  <th>Location_Janachaitanya Colony</th>                 <td>  1.08e+07</td> <td> 4.49e+06</td> <td>    2.403</td> <td> 0.016</td> <td> 1.99e+06</td> <td> 1.96e+07</td>
+</tr>
+<tr>
+  <th>Location_Jhangir Pet</th>                          <td>-2.088e+06</td> <td> 4.46e+06</td> <td>   -0.468</td> <td> 0.640</td> <td>-1.08e+07</td> <td> 6.66e+06</td>
+</tr>
+<tr>
+  <th>Location_Jubilee Hills</th>                        <td> 8.953e+06</td> <td> 7.64e+05</td> <td>   11.719</td> <td> 0.000</td> <td> 7.45e+06</td> <td> 1.05e+07</td>
+</tr>
+<tr>
+  <th>Location_KPHB</th>                                 <td> 9.633e+05</td> <td> 1.74e+06</td> <td>    0.555</td> <td> 0.579</td> <td>-2.44e+06</td> <td> 4.37e+06</td>
+</tr>
+<tr>
+  <th>Location_KRCR Colony Road</th>                     <td>-1.094e+06</td> <td>  3.2e+06</td> <td>   -0.342</td> <td> 0.732</td> <td>-7.36e+06</td> <td> 5.17e+06</td>
+</tr>
+<tr>
+  <th>Location_KTR Colony</th>                           <td>-1.994e+06</td> <td> 3.18e+06</td> <td>   -0.627</td> <td> 0.531</td> <td>-8.23e+06</td> <td> 4.24e+06</td>
+</tr>
+<tr>
+  <th>Location_Kachiguda</th>                            <td> 2.874e+05</td> <td> 1.37e+06</td> <td>    0.210</td> <td> 0.834</td> <td> -2.4e+06</td> <td> 2.98e+06</td>
+</tr>
+<tr>
+  <th>Location_Kapra</th>                                <td>-1.492e+06</td> <td> 2.03e+06</td> <td>   -0.736</td> <td> 0.462</td> <td>-5.46e+06</td> <td> 2.48e+06</td>
+</tr>
+<tr>
+  <th>Location_Karimnagar</th>                           <td> 1.913e+05</td> <td> 4.49e+06</td> <td>    0.043</td> <td> 0.966</td> <td> -8.6e+06</td> <td> 8.99e+06</td>
+</tr>
+<tr>
+  <th>Location_Karmanghat</th>                           <td>-1.236e+06</td> <td> 2.63e+06</td> <td>   -0.470</td> <td> 0.639</td> <td> -6.4e+06</td> <td> 3.92e+06</td>
+</tr>
+<tr>
+  <th>Location_Kavuri Hills</th>                         <td>-2.864e+06</td> <td> 4.55e+06</td> <td>   -0.629</td> <td> 0.529</td> <td>-1.18e+07</td> <td> 6.06e+06</td>
+</tr>
+<tr>
+  <th>Location_Khajaguda Nanakramguda Road</th>          <td> 1.523e+06</td> <td> 2.81e+06</td> <td>    0.542</td> <td> 0.588</td> <td>-3.99e+06</td> <td> 7.03e+06</td>
+</tr>
+<tr>
+  <th>Location_Khizra Enclave</th>                       <td>-1.965e+06</td> <td> 4.48e+06</td> <td>   -0.439</td> <td> 0.661</td> <td>-1.07e+07</td> <td> 6.82e+06</td>
+</tr>
+<tr>
+  <th>Location_Kismatpur</th>                            <td> 1.228e+06</td> <td> 4.59e+06</td> <td>    0.268</td> <td> 0.789</td> <td>-7.77e+06</td> <td> 1.02e+07</td>
+</tr>
+<tr>
+  <th>Location_Kistareddypet</th>                        <td>-1.651e+06</td> <td> 3.16e+06</td> <td>   -0.522</td> <td> 0.602</td> <td>-7.85e+06</td> <td> 4.55e+06</td>
+</tr>
+<tr>
+  <th>Location_Kokapet</th>                              <td>-3.259e+05</td> <td> 6.73e+05</td> <td>   -0.485</td> <td> 0.628</td> <td>-1.64e+06</td> <td> 9.93e+05</td>
+</tr>
+<tr>
+  <th>Location_Kokapeta Village</th>                     <td> -1.58e+06</td> <td> 4.52e+06</td> <td>   -0.350</td> <td> 0.727</td> <td>-1.04e+07</td> <td> 7.28e+06</td>
+</tr>
+<tr>
+  <th>Location_Kollur</th>                               <td>-2.296e+06</td> <td>  2.6e+06</td> <td>   -0.884</td> <td> 0.377</td> <td>-7.39e+06</td> <td>  2.8e+06</td>
+</tr>
+<tr>
+  <th>Location_Kollur Road</th>                          <td>-1.652e+06</td> <td> 1.06e+06</td> <td>   -1.553</td> <td> 0.121</td> <td>-3.74e+06</td> <td> 4.34e+05</td>
+</tr>
+<tr>
+  <th>Location_Kompally</th>                             <td>-1.029e+06</td> <td> 1.16e+06</td> <td>   -0.888</td> <td> 0.375</td> <td> -3.3e+06</td> <td> 1.24e+06</td>
+</tr>
+<tr>
+  <th>Location_Kondakal</th>                             <td> 2.273e+06</td> <td> 4.47e+06</td> <td>    0.508</td> <td> 0.611</td> <td>-6.49e+06</td> <td>  1.1e+07</td>
+</tr>
+<tr>
+  <th>Location_Kondapur</th>                             <td> 9.767e+05</td> <td> 4.81e+05</td> <td>    2.030</td> <td> 0.043</td> <td>  3.3e+04</td> <td> 1.92e+06</td>
+</tr>
+<tr>
+  <th>Location_Kothaguda</th>                            <td>-2.424e+06</td> <td> 2.07e+06</td> <td>   -1.169</td> <td> 0.242</td> <td>-6.49e+06</td> <td> 1.64e+06</td>
+</tr>
+<tr>
+  <th>Location_Kothapet</th>                             <td>-1.316e+06</td> <td>  4.5e+06</td> <td>   -0.292</td> <td> 0.770</td> <td>-1.01e+07</td> <td> 7.51e+06</td>
+</tr>
+<tr>
+  <th>Location_Kowkur</th>                               <td>-2.677e+06</td> <td> 4.48e+06</td> <td>   -0.597</td> <td> 0.550</td> <td>-1.15e+07</td> <td> 6.11e+06</td>
+</tr>
+<tr>
+  <th>Location_Krishna Reddy Pet</th>                    <td>-1.124e+06</td> <td> 8.15e+05</td> <td>   -1.379</td> <td> 0.168</td> <td>-2.72e+06</td> <td> 4.74e+05</td>
+</tr>
+<tr>
+  <th>Location_Kukatpally</th>                           <td> 8.572e+05</td> <td> 4.81e+05</td> <td>    1.781</td> <td> 0.075</td> <td>-8.67e+04</td> <td>  1.8e+06</td>
+</tr>
+<tr>
+  <th>Location_Kushaiguda</th>                           <td> 3.241e+05</td> <td> 2.26e+06</td> <td>    0.144</td> <td> 0.886</td> <td> -4.1e+06</td> <td> 4.75e+06</td>
+</tr>
+<tr>
+  <th>Location_LB Nagar</th>                             <td>-2.425e+06</td> <td> 1.22e+06</td> <td>   -1.982</td> <td> 0.048</td> <td>-4.82e+06</td> <td>-2.55e+04</td>
+</tr>
+<tr>
+  <th>Location_Lakdikapul</th>                           <td>-7.494e+05</td> <td> 4.47e+06</td> <td>   -0.168</td> <td> 0.867</td> <td>-9.52e+06</td> <td> 8.02e+06</td>
+</tr>
+<tr>
+  <th>Location_Lingampalli</th>                          <td>-4.534e+05</td> <td> 3.22e+06</td> <td>   -0.141</td> <td> 0.888</td> <td>-6.77e+06</td> <td> 5.86e+06</td>
+</tr>
+<tr>
+  <th>Location_Macha Bolarum</th>                        <td> -4.87e+06</td> <td> 4.52e+06</td> <td>   -1.078</td> <td> 0.281</td> <td>-1.37e+07</td> <td> 3.99e+06</td>
+</tr>
+<tr>
+  <th>Location_Madhapur</th>                             <td> 4.551e+06</td> <td> 8.49e+05</td> <td>    5.364</td> <td> 0.000</td> <td> 2.89e+06</td> <td> 6.22e+06</td>
+</tr>
+<tr>
+  <th>Location_Madhavaram Nagar Colony</th>              <td> 1.398e+06</td> <td> 4.56e+06</td> <td>    0.307</td> <td> 0.759</td> <td>-7.55e+06</td> <td> 1.03e+07</td>
+</tr>
+<tr>
+  <th>Location_Madhura Nagar</th>                        <td>  1.85e+06</td> <td>  4.5e+06</td> <td>    0.411</td> <td> 0.681</td> <td>-6.98e+06</td> <td> 1.07e+07</td>
+</tr>
+<tr>
+  <th>Location_Madinaguda</th>                           <td>-1.126e+06</td> <td> 1.32e+06</td> <td>   -0.854</td> <td> 0.393</td> <td>-3.71e+06</td> <td> 1.46e+06</td>
+</tr>
+<tr>
+  <th>Location_Mailardevpally</th>                       <td> 1.697e+06</td> <td> 4.76e+06</td> <td>    0.357</td> <td> 0.721</td> <td>-7.63e+06</td> <td>  1.1e+07</td>
+</tr>
+<tr>
+  <th>Location_Malkajgiri</th>                           <td> 4.579e+05</td> <td> 9.83e+05</td> <td>    0.466</td> <td> 0.642</td> <td>-1.47e+06</td> <td> 2.39e+06</td>
+</tr>
+<tr>
+  <th>Location_Mallampet</th>                            <td>-1.252e+06</td> <td> 1.05e+06</td> <td>   -1.195</td> <td> 0.232</td> <td>-3.31e+06</td> <td> 8.02e+05</td>
+</tr>
+<tr>
+  <th>Location_Mallapur</th>                             <td>-2.095e+06</td> <td> 1.11e+06</td> <td>   -1.894</td> <td> 0.058</td> <td>-4.26e+06</td> <td> 7.45e+04</td>
+</tr>
+<tr>
+  <th>Location_Manikonda</th>                            <td>-8.735e+05</td> <td> 5.07e+05</td> <td>   -1.724</td> <td> 0.085</td> <td>-1.87e+06</td> <td>  1.2e+05</td>
+</tr>
+<tr>
+  <th>Location_Mansoorabad</th>                          <td>-4.074e+05</td> <td> 4.46e+06</td> <td>   -0.091</td> <td> 0.927</td> <td>-9.16e+06</td> <td> 8.34e+06</td>
+</tr>
+<tr>
+  <th>Location_Masab Tank</th>                           <td> 4.831e+06</td> <td> 2.26e+06</td> <td>    2.134</td> <td> 0.033</td> <td> 3.92e+05</td> <td> 9.27e+06</td>
+</tr>
+<tr>
+  <th>Location_Matrusri Nagar</th>                       <td> 1.817e+06</td> <td> 4.48e+06</td> <td>    0.405</td> <td> 0.685</td> <td>-6.97e+06</td> <td> 1.06e+07</td>
+</tr>
+<tr>
+  <th>Location_Mayuri Nagar</th>                         <td>-3.784e+04</td> <td> 4.56e+06</td> <td>   -0.008</td> <td> 0.993</td> <td>-8.98e+06</td> <td> 8.91e+06</td>
+</tr>
+<tr>
+  <th>Location_Medchal</th>                              <td>  5.38e+04</td> <td>  2.6e+06</td> <td>    0.021</td> <td> 0.983</td> <td>-5.04e+06</td> <td> 5.15e+06</td>
+</tr>
+<tr>
+  <th>Location_Meerpet</th>                              <td> -2.17e+06</td> <td> 4.47e+06</td> <td>   -0.485</td> <td> 0.628</td> <td>-1.09e+07</td> <td> 6.61e+06</td>
+</tr>
+<tr>
+  <th>Location_Mehdipatnam</th>                          <td>-7.801e+05</td> <td> 1.44e+06</td> <td>   -0.541</td> <td> 0.589</td> <td>-3.61e+06</td> <td> 2.05e+06</td>
+</tr>
+<tr>
+  <th>Location_Methodist Colony</th>                     <td>-3.536e+05</td> <td> 4.47e+06</td> <td>   -0.079</td> <td> 0.937</td> <td>-9.11e+06</td> <td>  8.4e+06</td>
+</tr>
+<tr>
+  <th>Location_Mettuguda</th>                            <td>-1.109e+06</td> <td> 4.47e+06</td> <td>   -0.248</td> <td> 0.804</td> <td>-9.87e+06</td> <td> 7.65e+06</td>
+</tr>
+<tr>
+  <th>Location_Miyapur</th>                              <td> -1.91e+04</td> <td> 5.89e+05</td> <td>   -0.032</td> <td> 0.974</td> <td>-1.17e+06</td> <td> 1.14e+06</td>
+</tr>
+<tr>
+  <th>Location_Miyapur Bachupally Road</th>              <td> -1.66e+06</td> <td> 3.18e+06</td> <td>   -0.522</td> <td> 0.602</td> <td> -7.9e+06</td> <td> 4.58e+06</td>
+</tr>
+<tr>
+  <th>Location_Miyapur HMT Swarnapuri Colony</th>        <td> 2.005e+05</td> <td> 4.51e+06</td> <td>    0.044</td> <td> 0.965</td> <td>-8.65e+06</td> <td> 9.05e+06</td>
+</tr>
+<tr>
+  <th>Location_Moosapet</th>                             <td> 6.962e+05</td> <td> 1.72e+06</td> <td>    0.404</td> <td> 0.686</td> <td>-2.68e+06</td> <td> 4.08e+06</td>
+</tr>
+<tr>
+  <th>Location_Moti Nagar</th>                           <td> 1.178e+06</td> <td> 4.53e+06</td> <td>    0.260</td> <td> 0.795</td> <td> -7.7e+06</td> <td> 1.01e+07</td>
+</tr>
+<tr>
+  <th>Location_Moula Ali</th>                            <td>  6.62e+05</td> <td> 1.74e+06</td> <td>    0.381</td> <td> 0.703</td> <td>-2.75e+06</td> <td> 4.07e+06</td>
+</tr>
+<tr>
+  <th>Location_Murad Nagar</th>                          <td> 4.313e+05</td> <td> 3.16e+06</td> <td>    0.136</td> <td> 0.892</td> <td>-5.77e+06</td> <td> 6.63e+06</td>
+</tr>
+<tr>
+  <th>Location_NRSA Colony</th>                          <td> 1.589e+06</td> <td> 4.49e+06</td> <td>    0.354</td> <td> 0.723</td> <td>-7.21e+06</td> <td> 1.04e+07</td>
+</tr>
+<tr>
+  <th>Location_Nacharam</th>                             <td>  9.95e+05</td> <td> 1.11e+06</td> <td>    0.899</td> <td> 0.369</td> <td>-1.18e+06</td> <td> 3.17e+06</td>
+</tr>
+<tr>
+  <th>Location_Nagole</th>                               <td>-1.313e+06</td> <td> 1.15e+06</td> <td>   -1.139</td> <td> 0.255</td> <td>-3.58e+06</td> <td> 9.49e+05</td>
+</tr>
+<tr>
+  <th>Location_Nallagandla Gachibowli</th>               <td> 4733.6621</td> <td> 1.01e+06</td> <td>    0.005</td> <td> 0.996</td> <td>-1.98e+06</td> <td> 1.99e+06</td>
+</tr>
+<tr>
+  <th>Location_Nallagandla Road</th>                     <td> 1.245e+06</td> <td> 4.51e+06</td> <td>    0.276</td> <td> 0.782</td> <td> -7.6e+06</td> <td> 1.01e+07</td>
+</tr>
+<tr>
+  <th>Location_Nallakunta</th>                           <td> 1.613e+06</td> <td> 1.32e+06</td> <td>    1.223</td> <td> 0.221</td> <td>-9.73e+05</td> <td>  4.2e+06</td>
+</tr>
+<tr>
+  <th>Location_Nanakramguda</th>                         <td> 1.597e+06</td> <td> 7.69e+05</td> <td>    2.077</td> <td> 0.038</td> <td> 8.95e+04</td> <td> 3.11e+06</td>
+</tr>
+<tr>
+  <th>Location_Nandagiri Hills</th>                      <td> 4.893e+06</td> <td>  3.2e+06</td> <td>    1.527</td> <td> 0.127</td> <td>-1.39e+06</td> <td> 1.12e+07</td>
+</tr>
+<tr>
+  <th>Location_Narayanguda</th>                          <td>-2.903e+06</td> <td> 4.46e+06</td> <td>   -0.650</td> <td> 0.516</td> <td>-1.17e+07</td> <td> 5.85e+06</td>
+</tr>
+<tr>
+  <th>Location_Narsingi</th>                             <td> 5.835e+04</td> <td> 7.35e+05</td> <td>    0.079</td> <td> 0.937</td> <td>-1.38e+06</td> <td>  1.5e+06</td>
+</tr>
+<tr>
+  <th>Location_Neknampur</th>                            <td> 2.629e+04</td> <td> 2.61e+06</td> <td>    0.010</td> <td> 0.992</td> <td>-5.09e+06</td> <td> 5.14e+06</td>
+</tr>
+<tr>
+  <th>Location_Neredmet</th>                             <td>-3.465e+06</td> <td> 4.52e+06</td> <td>   -0.767</td> <td> 0.443</td> <td>-1.23e+07</td> <td>  5.4e+06</td>
+</tr>
+<tr>
+  <th>Location_New Maruthi Nagar</th>                    <td> -4.42e+06</td> <td>  4.6e+06</td> <td>   -0.961</td> <td> 0.336</td> <td>-1.34e+07</td> <td>  4.6e+06</td>
+</tr>
+<tr>
+  <th>Location_Nizampet</th>                             <td>-8.668e+05</td> <td> 5.08e+05</td> <td>   -1.707</td> <td> 0.088</td> <td>-1.86e+06</td> <td> 1.29e+05</td>
+</tr>
+<tr>
+  <th>Location_Old Alwal</th>                            <td>-3.894e+06</td> <td> 4.52e+06</td> <td>   -0.862</td> <td> 0.389</td> <td>-1.28e+07</td> <td> 4.97e+06</td>
+</tr>
+<tr>
+  <th>Location_Old Bowenpally</th>                       <td>-4.066e+06</td> <td> 2.62e+06</td> <td>   -1.553</td> <td> 0.121</td> <td> -9.2e+06</td> <td> 1.07e+06</td>
+</tr>
+<tr>
+  <th>Location_Old Nallakunta</th>                       <td>-7.021e+05</td> <td> 4.47e+06</td> <td>   -0.157</td> <td> 0.875</td> <td>-9.47e+06</td> <td> 8.07e+06</td>
+</tr>
+<tr>
+  <th>Location_Padma Colony</th>                         <td> 1.745e+06</td> <td> 4.46e+06</td> <td>    0.391</td> <td> 0.696</td> <td>-7.01e+06</td> <td> 1.05e+07</td>
+</tr>
+<tr>
+  <th>Location_Padmarao Nagar</th>                       <td> 1.761e+06</td> <td> 2.61e+06</td> <td>    0.674</td> <td> 0.501</td> <td>-3.37e+06</td> <td> 6.89e+06</td>
+</tr>
+<tr>
+  <th>Location_Panchavati Colony Manikonda</th>          <td>-7.196e+05</td> <td> 4.49e+06</td> <td>   -0.160</td> <td> 0.873</td> <td>-9.52e+06</td> <td> 8.08e+06</td>
+</tr>
+<tr>
+  <th>Location_Paradise Circle</th>                      <td>-6.476e+06</td> <td>  4.5e+06</td> <td>   -1.440</td> <td> 0.150</td> <td>-1.53e+07</td> <td> 2.34e+06</td>
+</tr>
+<tr>
+  <th>Location_Paramount Colony Toli Chowki</th>         <td>-7.072e+05</td> <td> 4.48e+06</td> <td>   -0.158</td> <td> 0.875</td> <td>-9.49e+06</td> <td> 8.07e+06</td>
+</tr>
+<tr>
+  <th>Location_Patancheru</th>                           <td>-1.698e+06</td> <td> 1.19e+06</td> <td>   -1.428</td> <td> 0.153</td> <td>-4.03e+06</td> <td> 6.33e+05</td>
+</tr>
+<tr>
+  <th>Location_Patancheru Shankarpalli Road</th>         <td>-2.188e+06</td> <td> 2.02e+06</td> <td>   -1.086</td> <td> 0.278</td> <td>-6.14e+06</td> <td> 1.76e+06</td>
+</tr>
+<tr>
+  <th>Location_Pati</th>                                 <td>-2.692e+06</td> <td> 1.52e+06</td> <td>   -1.773</td> <td> 0.076</td> <td>-5.67e+06</td> <td> 2.86e+05</td>
+</tr>
+<tr>
+  <th>Location_Picket</th>                               <td>-4.329e+06</td> <td> 4.51e+06</td> <td>   -0.960</td> <td> 0.337</td> <td>-1.32e+07</td> <td> 4.52e+06</td>
+</tr>
+<tr>
+  <th>Location_Pocharam</th>                             <td>-8.547e+06</td> <td> 4.61e+06</td> <td>   -1.854</td> <td> 0.064</td> <td>-1.76e+07</td> <td> 4.95e+05</td>
+</tr>
+<tr>
+  <th>Location_Pragathi Nagar</th>                       <td> 4.155e+05</td> <td> 1.87e+06</td> <td>    0.222</td> <td> 0.824</td> <td>-3.25e+06</td> <td> 4.08e+06</td>
+</tr>
+<tr>
+  <th>Location_Pragathi Nagar Kukatpally</th>            <td>-3.195e+05</td> <td> 7.72e+05</td> <td>   -0.414</td> <td> 0.679</td> <td>-1.83e+06</td> <td> 1.19e+06</td>
+</tr>
+<tr>
+  <th>Location_Pragathi Nagar Road</th>                  <td>-2.997e+05</td> <td> 2.28e+06</td> <td>   -0.131</td> <td> 0.895</td> <td>-4.77e+06</td> <td> 4.17e+06</td>
+</tr>
+<tr>
+  <th>Location_Pragati Nagar</th>                        <td>-7.345e+05</td> <td> 2.67e+06</td> <td>   -0.275</td> <td> 0.783</td> <td>-5.97e+06</td> <td>  4.5e+06</td>
+</tr>
+<tr>
+  <th>Location_Puppalaguda</th>                          <td>-1.644e+06</td> <td> 7.13e+05</td> <td>   -2.306</td> <td> 0.021</td> <td>-3.04e+06</td> <td>-2.46e+05</td>
+</tr>
+<tr>
+  <th>Location_Quthbullapur</th>                         <td>-1.813e+06</td> <td> 4.49e+06</td> <td>   -0.404</td> <td> 0.686</td> <td>-1.06e+07</td> <td> 6.99e+06</td>
+</tr>
+<tr>
+  <th>Location_Qutub Shahi Tombs</th>                    <td> 1.272e+06</td> <td> 2.59e+06</td> <td>    0.491</td> <td> 0.624</td> <td>-3.81e+06</td> <td> 6.36e+06</td>
+</tr>
+<tr>
+  <th>Location_Rajbhavan Road Somajiguda</th>            <td>-3.076e+06</td> <td> 4.72e+06</td> <td>   -0.651</td> <td> 0.515</td> <td>-1.23e+07</td> <td> 6.18e+06</td>
+</tr>
+<tr>
+  <th>Location_Rajendra Nagar</th>                       <td> 1.183e+06</td> <td> 2.05e+06</td> <td>    0.578</td> <td> 0.563</td> <td>-2.83e+06</td> <td>  5.2e+06</td>
+</tr>
+<tr>
+  <th>Location_Rakshapuram</th>                          <td>-3.035e+05</td> <td> 4.47e+06</td> <td>   -0.068</td> <td> 0.946</td> <td>-9.07e+06</td> <td> 8.46e+06</td>
+</tr>
+<tr>
+  <th>Location_Ramachandra Puram</th>                    <td> 8.218e+05</td> <td> 3.18e+06</td> <td>    0.258</td> <td> 0.796</td> <td>-5.42e+06</td> <td> 7.07e+06</td>
+</tr>
+<tr>
+  <th>Location_Ramnagar Gundu</th>                       <td>-7.787e+05</td> <td> 2.62e+06</td> <td>   -0.297</td> <td> 0.767</td> <td>-5.92e+06</td> <td> 4.37e+06</td>
+</tr>
+<tr>
+  <th>Location_Residential Flat Machavaram</th>          <td>-7.989e+05</td> <td> 4.67e+06</td> <td>   -0.171</td> <td> 0.864</td> <td>-9.96e+06</td> <td> 8.36e+06</td>
+</tr>
+<tr>
+  <th>Location_Rhoda Mistri Nagar</th>                   <td>-6.571e+05</td> <td> 3.22e+06</td> <td>   -0.204</td> <td> 0.838</td> <td>-6.97e+06</td> <td> 5.66e+06</td>
+</tr>
+<tr>
+  <th>Location_Ring Road</th>                            <td> -1.71e+06</td> <td> 4.49e+06</td> <td>   -0.381</td> <td> 0.703</td> <td>-1.05e+07</td> <td>  7.1e+06</td>
+</tr>
+<tr>
+  <th>Location_Safilguda</th>                            <td>-2.424e+06</td> <td> 3.24e+06</td> <td>   -0.747</td> <td> 0.455</td> <td>-8.78e+06</td> <td> 3.94e+06</td>
+</tr>
+<tr>
+  <th>Location_Sainikpuri</th>                           <td>-1.162e+06</td> <td> 1.53e+06</td> <td>   -0.759</td> <td> 0.448</td> <td>-4.17e+06</td> <td> 1.84e+06</td>
+</tr>
+<tr>
+  <th>Location_Saket</th>                                <td> 1.069e+07</td> <td> 4.47e+06</td> <td>    2.393</td> <td> 0.017</td> <td> 1.93e+06</td> <td> 1.94e+07</td>
+</tr>
+<tr>
+  <th>Location_Sanath Nagar</th>                         <td> 2.535e+06</td> <td>  1.3e+06</td> <td>    1.949</td> <td> 0.051</td> <td> -1.5e+04</td> <td> 5.09e+06</td>
+</tr>
+<tr>
+  <th>Location_Sangeet Nagar</th>                        <td>-1.337e+07</td> <td> 4.48e+06</td> <td>   -2.983</td> <td> 0.003</td> <td>-2.22e+07</td> <td>-4.58e+06</td>
+</tr>
+<tr>
+  <th>Location_Santoshnagar</th>                         <td>-5.462e+05</td> <td> 4.47e+06</td> <td>   -0.122</td> <td> 0.903</td> <td>-9.31e+06</td> <td> 8.22e+06</td>
+</tr>
+<tr>
+  <th>Location_Saroornagar</th>                          <td> 7.394e+05</td> <td> 1.89e+06</td> <td>    0.391</td> <td> 0.696</td> <td>-2.97e+06</td> <td> 4.45e+06</td>
+</tr>
+<tr>
+  <th>Location_Secunderabad Railway Station Road</th>    <td>-5.694e+06</td> <td> 4.52e+06</td> <td>   -1.260</td> <td> 0.208</td> <td>-1.46e+07</td> <td> 3.17e+06</td>
+</tr>
+<tr>
+  <th>Location_Serilingampally</th>                      <td> 1.302e+05</td> <td> 8.33e+05</td> <td>    0.156</td> <td> 0.876</td> <td> -1.5e+06</td> <td> 1.76e+06</td>
+</tr>
+<tr>
+  <th>Location_Shadnagar</th>                            <td>-5.436e+05</td> <td> 2.82e+06</td> <td>   -0.193</td> <td> 0.847</td> <td>-6.07e+06</td> <td> 4.98e+06</td>
+</tr>
+<tr>
+  <th>Location_Shaikpet</th>                             <td> 1.745e+06</td> <td> 1.36e+06</td> <td>    1.284</td> <td> 0.199</td> <td> -9.2e+05</td> <td> 4.41e+06</td>
+</tr>
+<tr>
+  <th>Location_Shamshabad</th>                           <td>-7.098e+06</td> <td> 4.52e+06</td> <td>   -1.571</td> <td> 0.116</td> <td> -1.6e+07</td> <td> 1.76e+06</td>
+</tr>
+<tr>
+  <th>Location_Shankarpalli</th>                         <td>-5.555e+04</td> <td>  4.5e+06</td> <td>   -0.012</td> <td> 0.990</td> <td>-8.88e+06</td> <td> 8.77e+06</td>
+</tr>
+<tr>
+  <th>Location_Sikh Village</th>                         <td>-5.399e+06</td> <td> 4.52e+06</td> <td>   -1.195</td> <td> 0.232</td> <td>-1.43e+07</td> <td> 3.46e+06</td>
+</tr>
+<tr>
+  <th>Location_Somajiguda</th>                           <td> 4.452e+06</td> <td> 1.55e+06</td> <td>    2.869</td> <td> 0.004</td> <td> 1.41e+06</td> <td> 7.49e+06</td>
+</tr>
+<tr>
+  <th>Location_Sri Nagar Colony</th>                     <td> 5.356e+06</td> <td> 1.62e+06</td> <td>    3.298</td> <td> 0.001</td> <td> 2.17e+06</td> <td> 8.54e+06</td>
+</tr>
+<tr>
+  <th>Location_Srisailam Highway</th>                    <td> -8.22e+04</td> <td> 4.51e+06</td> <td>   -0.018</td> <td> 0.985</td> <td>-8.92e+06</td> <td> 8.76e+06</td>
+</tr>
+<tr>
+  <th>Location_Suchitra</th>                             <td>-1.078e+06</td> <td> 1.76e+06</td> <td>   -0.613</td> <td> 0.540</td> <td>-4.53e+06</td> <td> 2.37e+06</td>
+</tr>
+<tr>
+  <th>Location_Sun City</th>                             <td> 7.183e+06</td> <td> 2.63e+06</td> <td>    2.730</td> <td> 0.006</td> <td> 2.02e+06</td> <td> 1.23e+07</td>
+</tr>
+<tr>
+  <th>Location_Sun City Padmasri Estates</th>            <td>-2.924e+05</td> <td> 4.46e+06</td> <td>   -0.066</td> <td> 0.948</td> <td>-9.05e+06</td> <td> 8.46e+06</td>
+</tr>
+<tr>
+  <th>Location_Tarnaka</th>                              <td>-8.044e+05</td> <td> 1.26e+06</td> <td>   -0.638</td> <td> 0.523</td> <td>-3.28e+06</td> <td> 1.67e+06</td>
+</tr>
+<tr>
+  <th>Location_Tellapur</th>                             <td>-1.953e+06</td> <td> 9.34e+05</td> <td>   -2.091</td> <td> 0.037</td> <td>-3.78e+06</td> <td>-1.22e+05</td>
+</tr>
+<tr>
+  <th>Location_TellapurOsman Nagar Road</th>             <td>-1.129e+06</td> <td> 1.45e+06</td> <td>   -0.780</td> <td> 0.436</td> <td>-3.97e+06</td> <td> 1.71e+06</td>
+</tr>
+<tr>
+  <th>Location_Tilak Nagar</th>                          <td>-3.947e+05</td> <td>  3.2e+06</td> <td>   -0.123</td> <td> 0.902</td> <td>-6.67e+06</td> <td> 5.89e+06</td>
+</tr>
+<tr>
+  <th>Location_Tirumalgiri</th>                          <td>-1.024e+05</td> <td> 3.33e+06</td> <td>   -0.031</td> <td> 0.975</td> <td>-6.63e+06</td> <td> 6.43e+06</td>
+</tr>
+<tr>
+  <th>Location_Toli Chowki</th>                          <td>-1.679e+06</td> <td> 1.31e+06</td> <td>   -1.282</td> <td> 0.200</td> <td>-4.25e+06</td> <td>  8.9e+05</td>
+</tr>
+<tr>
+  <th>Location_Tolichowki</th>                           <td>-3.281e+06</td> <td> 4.47e+06</td> <td>   -0.735</td> <td> 0.463</td> <td> -1.2e+07</td> <td> 5.48e+06</td>
+</tr>
+<tr>
+  <th>Location_Trimalgherry</th>                         <td>-2.195e+06</td> <td> 2.28e+06</td> <td>   -0.962</td> <td> 0.336</td> <td>-6.67e+06</td> <td> 2.28e+06</td>
+</tr>
+<tr>
+  <th>Location_Tukkuguda Airport View Point Road</th>    <td>-3.036e+06</td> <td> 3.16e+06</td> <td>   -0.960</td> <td> 0.337</td> <td>-9.24e+06</td> <td> 3.16e+06</td>
+</tr>
+<tr>
+  <th>Location_Uppal</th>                                <td>-2.759e+05</td> <td> 1.51e+06</td> <td>   -0.183</td> <td> 0.855</td> <td>-3.24e+06</td> <td> 2.69e+06</td>
+</tr>
+<tr>
+  <th>Location_Uppal Kalan</th>                          <td>-1.471e+06</td> <td> 2.06e+06</td> <td>   -0.716</td> <td> 0.474</td> <td> -5.5e+06</td> <td> 2.56e+06</td>
+</tr>
+<tr>
+  <th>Location_Uppalguda</th>                            <td>-1.647e+06</td> <td> 2.59e+06</td> <td>   -0.637</td> <td> 0.524</td> <td>-6.72e+06</td> <td> 3.42e+06</td>
+</tr>
+<tr>
+  <th>Location_Usman Nagar</th>                          <td>-7.155e+05</td> <td> 4.46e+06</td> <td>   -0.160</td> <td> 0.873</td> <td>-9.47e+06</td> <td> 8.04e+06</td>
+</tr>
+<tr>
+  <th>Location_Vanasthalipuram</th>                      <td> 5.347e+05</td> <td> 3.18e+06</td> <td>    0.168</td> <td> 0.867</td> <td>-5.71e+06</td> <td> 6.78e+06</td>
+</tr>
+<tr>
+  <th>Location_Venkat Nagar Colony</th>                  <td> 1.651e+06</td> <td> 4.48e+06</td> <td>    0.368</td> <td> 0.713</td> <td>-7.14e+06</td> <td> 1.04e+07</td>
+</tr>
+<tr>
+  <th>Location_Vidyanagar Adikmet</th>                   <td> 5.154e+06</td> <td>  4.5e+06</td> <td>    1.146</td> <td> 0.252</td> <td>-3.67e+06</td> <td>  1.4e+07</td>
+</tr>
+<tr>
+  <th>Location_Vivekananda Nagar Colony</th>             <td> 1.656e+06</td> <td> 4.49e+06</td> <td>    0.369</td> <td> 0.712</td> <td>-7.14e+06</td> <td> 1.05e+07</td>
+</tr>
+<tr>
+  <th>Location_West Marredpally</th>                     <td> -8.58e+05</td> <td> 1.15e+06</td> <td>   -0.748</td> <td> 0.454</td> <td>-3.11e+06</td> <td> 1.39e+06</td>
+</tr>
+<tr>
+  <th>Location_Whisper Valley</th>                       <td>-2.072e+06</td> <td> 2.09e+06</td> <td>   -0.992</td> <td> 0.321</td> <td>-6.16e+06</td> <td> 2.02e+06</td>
+</tr>
+<tr>
+  <th>Location_Whitefield</th>                           <td>-3.342e+06</td> <td> 4.51e+06</td> <td>   -0.742</td> <td> 0.458</td> <td>-1.22e+07</td> <td>  5.5e+06</td>
+</tr>
+<tr>
+  <th>Location_Whitefields</th>                          <td>   6.9e+06</td> <td> 4.53e+06</td> <td>    1.524</td> <td> 0.128</td> <td>-1.98e+06</td> <td> 1.58e+07</td>
+</tr>
+<tr>
+  <th>Location_Yapral</th>                               <td>-3.044e+06</td> <td> 1.85e+06</td> <td>   -1.645</td> <td> 0.100</td> <td>-6.67e+06</td> <td> 5.84e+05</td>
+</tr>
+<tr>
+  <th>Location_Zamistanpur</th>                          <td>-3.549e+05</td> <td> 2.28e+06</td> <td>   -0.156</td> <td> 0.876</td> <td>-4.82e+06</td> <td> 4.11e+06</td>
+</tr>
+<tr>
+  <th>Location_chandrayangutta</th>                      <td>-2.005e+06</td> <td> 4.46e+06</td> <td>   -0.449</td> <td> 0.653</td> <td>-1.08e+07</td> <td> 6.75e+06</td>
+</tr>
+<tr>
+  <th>Location_financial District</th>                   <td>-2.396e+06</td> <td> 3.16e+06</td> <td>   -0.757</td> <td> 0.449</td> <td> -8.6e+06</td> <td> 3.81e+06</td>
+</tr>
+<tr>
+  <th>Location_hyderabad</th>                            <td> 1.923e+06</td> <td>  4.5e+06</td> <td>    0.427</td> <td> 0.669</td> <td>-6.91e+06</td> <td> 1.08e+07</td>
+</tr>
+<tr>
+  <th>Location_manneguda</th>                            <td>  -1.4e+06</td> <td>  4.5e+06</td> <td>   -0.311</td> <td> 0.756</td> <td>-1.02e+07</td> <td> 7.43e+06</td>
+</tr>
+<tr>
+  <th>Location_muthangi</th>                             <td>-2.412e+06</td> <td> 3.16e+06</td> <td>   -0.763</td> <td> 0.445</td> <td>-8.61e+06</td> <td> 3.79e+06</td>
+</tr>
+<tr>
+  <th>Location_new nallakunta</th>                       <td> 1.104e+06</td> <td> 2.63e+06</td> <td>    0.420</td> <td> 0.675</td> <td>-4.05e+06</td> <td> 6.26e+06</td>
+</tr>
+<tr>
+  <th>Location_nizampet road</th>                        <td>-2.977e+05</td> <td> 3.18e+06</td> <td>   -0.094</td> <td> 0.925</td> <td>-6.54e+06</td> <td> 5.94e+06</td>
+</tr>
+<tr>
+  <th>Location_raidurgam</th>                            <td> 1.359e+05</td> <td> 4.74e+06</td> <td>    0.029</td> <td> 0.977</td> <td>-9.16e+06</td> <td> 9.43e+06</td>
+</tr>
+<tr>
+  <th>Location_west venkatapuram</th>                    <td>-1.227e+06</td> <td> 4.48e+06</td> <td>   -0.274</td> <td> 0.784</td> <td>   -1e+07</td> <td> 7.56e+06</td>
+</tr>
+</table>
+<table class="simpletable">
+<tr>
+  <th>Omnibus:</th>       <td>4946.795</td> <th>  Durbin-Watson:     </th>   <td>   2.013</td>  
+</tr>
+<tr>
+  <th>Prob(Omnibus):</th>  <td> 0.000</td>  <th>  Jarque-Bera (JB):  </th> <td>26106614.749</td>
+</tr>
+<tr>
+  <th>Skew:</th>           <td>14.869</td>  <th>  Prob(JB):          </th>   <td>    0.00</td>  
+</tr>
+<tr>
+  <th>Kurtosis:</th>       <td>500.943</td> <th>  Cond. No.          </th>   <td>3.54e+18</td>  
+</tr>
+</table><br/><br/>Notes:<br/>[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.<br/>[2] The smallest eigenvalue is 6.56e-28. This might indicate that there are<br/>strong multicollinearity problems or that the design matrix is singular.</div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results_regression</span><span class="o">.</span><span class="n">params</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>const                        -2.172483e+06
+Area                          9.017104e+03
+No. of Bedrooms              -1.402722e+06
+Resale                        1.167010e+06
+MaintenanceStaff             -9.870834e+05
+                                  ...     
+Location_muthangi            -2.412456e+06
+Location_new nallakunta       1.104397e+06
+Location_nizampet road       -2.977143e+05
+Location_raidurgam            1.358650e+05
+Location_west venkatapuram   -1.226744e+06
+Length: 282, dtype: float64
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_scatter</span><span class="p">(</span>
+    <span class="n">results_regression</span><span class="o">.</span><span class="n">fittedvalues</span><span class="p">,</span>
+    <span class="n">results_regression</span><span class="o">.</span><span class="n">resid</span><span class="p">,</span>
+    <span class="n">x_label</span> <span class="o">=</span> <span class="s2">"Fitted Values"</span><span class="p">,</span>
+    <span class="n">y_label</span> <span class="o">=</span> <span class="s2">"Residual Values"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># Not sure why it plots twice</span>
+<span class="n">sm</span><span class="o">.</span><span class="n">qqplot</span><span class="p">(</span><span class="n">results_regression</span><span class="o">.</span><span class="n">resid_pearson</span><span class="p">,</span> <span class="n">line</span> <span class="o">=</span> <span class="s2">"q"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/5e15c213b2c6bc246e42e355d775705fb25437e67cfa62412c7f1968859e2466.png" src="../../_images/5e15c213b2c6bc246e42e355d775705fb25437e67cfa62412c7f1968859e2466.png" />
+<img alt="../../_images/cc63bd2b53c1d4acbc9d31affcc293414a790a96c002b01d7d1c77a6becee3f9.png" src="../../_images/cc63bd2b53c1d4acbc9d31affcc293414a790a96c002b01d7d1c77a6becee3f9.png" />
+<img alt="../../_images/cc63bd2b53c1d4acbc9d31affcc293414a790a96c002b01d7d1c77a6becee3f9.png" src="../../_images/cc63bd2b53c1d4acbc9d31affcc293414a790a96c002b01d7d1c77a6becee3f9.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">house</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">'No. of Bedrooms'</span> <span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">'Area'</span><span class="p">:</span> <span class="mi">1000</span> <span class="p">}</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">predict_linear_regression</span><span class="p">(</span><span class="n">fitted_model</span><span class="p">,</span> <span class="n">dict_features</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">""" </span>
+<span class="sd">    Calculates y ~ const + sum( parameter*value )</span>
+
+<span class="sd">    { 'feature name' : value }</span>
+<span class="sd">    </span>
+<span class="sd">    Does not assume you have all features present, so prediction may be off.</span>
+<span class="sd">    Assumes const parameter is not present in dictionary</span>
+<span class="sd">    """</span>
+    <span class="n">list_given_terms</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">fitted_model</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">*</span><span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dict_features</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">]</span>
+    <span class="n">constant_value</span> <span class="o">=</span> <span class="n">fitted_model</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s1">'const'</span><span class="p">]</span>
+    <span class="n">list_given_terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">constant_value</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">list_given_terms</span><span class="p">)</span>
+
+<span class="n">prediction</span> <span class="o">=</span> <span class="n">predict_linear_regression</span><span class="p">(</span><span class="n">results_regression</span><span class="p">,</span> <span class="n">house</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Predicted housing price:"</span><span class="p">,</span> <span class="n">prediction</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Predicted housing price: 2636455.9536827086
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./chapter_03_linear_regression/refactored"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="coding_linear_regression.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Chapter 3: Linear Regression for a housing dataset</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="house_price_predictions_toy.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">House predictions with linear regression using a toy dataset</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">House Price Predictions with Linear Regression</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exploring-the-relationship-between-price-and-area">Exploring the relationship between price and area</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#with-turicreate">With turicreate</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#testing-a-model-with-only-one-feature">Testing a model with only one feature</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#building-a-model-that-uses-all-the-features">Building a model that uses all the features</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#with-statsmodels">With statsmodels</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Testing a model with only one feature</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Building a model that uses all the features</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Luis Serrano
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
